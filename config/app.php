@@ -180,9 +180,12 @@ return [
         /*
          * Manually added
          */
+        // mongodb eloquent
         Jenssegers\Mongodb\MongodbServiceProvider::class,
+        // sentry ( errors handler )
         Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
-
+        // botman
+        BotMan\BotMan\BotManServiceProvider::class,
     ],
 
     /*
