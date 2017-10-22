@@ -173,15 +173,19 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        /**
-         * Manually
+        /*
+         * Manually added
          */
+        // mongodb eloquent
         Jenssegers\Mongodb\MongodbServiceProvider::class,
-
+        // sentry ( errors handler )
+        Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
+        // botman
+        BotMan\BotMan\BotManServiceProvider::class,
     ],
 
     /*
@@ -230,6 +234,10 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        /*
+         * Manually added
+         */
+        'Sentry' => Sentry\SentryLaravel\SentryFacade::class,
 
     ],
 
