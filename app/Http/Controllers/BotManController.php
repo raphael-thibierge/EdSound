@@ -48,6 +48,10 @@ class BotManController extends Controller
             $bot->reply($apiReply);
         })->middleware($dialogflow);
 
+        $botman->hears('test', function (BotMan $bot) {
+            $bot->reply('Test validé !');
+        });
+
         // default response
         $botman->fallback(function (BotMan $bot){
             $bot->reply("I didn't get that..");
