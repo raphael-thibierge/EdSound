@@ -3,7 +3,14 @@
 namespace App;
 
 use Illuminate\Notifications\Notifiable;
+use Jenssegers\Mongodb\Relations\BelongsToMany;
+use Jenssegers\Mongodb\Relations\HasMany;
 
+/**
+ * @property string spotify_access_token
+ * @property string messenger_sender_id
+ * @property array asGuestPlaylists
+ */
 class User extends \Jenssegers\Mongodb\Auth\User
 {
     use Notifiable;
@@ -28,7 +35,14 @@ class User extends \Jenssegers\Mongodb\Auth\User
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name',
+        'email',
+        'password',
+        'messenger_sender_id',
+        'spotify_access_token',
+        'spotify_refresh_token',
+        'spotify_user_data',
+        'playlist_as_guest_ids'
     ];
 
     /**
@@ -39,4 +53,42 @@ class User extends \Jenssegers\Mongodb\Auth\User
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+
+    public function isLinkedToSpotify(): bool {
+        return isset($this->spotify_access_token) && !empty($this->spotify_access_token);
+    }
+
+    public function playlists() : HasMany{
+        return $this->HasMany('App\Playlist');
+    }
+
+
+    public function merge( User &$secondUser)
+    {
+
+        // mege attributes
+        foreach ($this->fillable as $field){
+            if ($this->getAttribute($field) === null
+                && $secondUser->getAttribute($field) !== $this->getAttribute($field)){
+                $this->setAttribute($field, $secondUser->getAttribute($field));
+            }
+        }
+
+        // merge playlists
+        $secondUser->playlists()->update(['created_by_user_id' => $secondUser]);
+
+        // merge playlists as guests
+        foreach ($secondUser->asGuestPlaylists as $playlist){
+            $secondUser->asGuestPlaylists()->dissociate($playlist);
+            $this->asGuestPlaylists()->associate($playlist);
+        }
+
+    }
+
+    public function playlistAsGuests(): BelongsToMany{
+        return $this->belongsToMany('App\Playlist',  null, 'guests_ids', 'playlist_as_guest_ids');
+    }
+
+
 }

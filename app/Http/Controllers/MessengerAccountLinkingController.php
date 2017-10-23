@@ -46,16 +46,13 @@ class MessengerAccountLinkingController extends Controller
 
             // not same account
             if ($postConfirmUser->messenger_sender_id !== $messagerSenderUser->messenger_sender_id){
-                $postConfirmUser->merge($messagerSenderUser);
-                $postConfirmUser->save();
-                $messagerSenderUser->delete();
+                $messagerSenderUser->merge($messagerSenderUser);
+                $messagerSenderUser->save();
+                $postConfirmUser->delete();
             }
-
-        } else {
-            return response()->json('error');
         }
 
-        return Redirect::to($request->get('redirect_uri') . '&authorization_code=' . $user->id);
+        return Redirect::to($request->get('redirect_uri') . '&authorization_code=' . $postConfirmUser->id);
     }
 
     /**

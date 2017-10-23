@@ -1,0 +1,84 @@
+<?php
+
+namespace App;
+
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Jenssegers\Mongodb\Eloquent\Model;
+
+/**
+ * @property array opened_at_dates
+ * @property array closed_at_dates
+ * @property string status
+ */
+class Playlist extends Model
+{
+    const STATUS_OPEN = 'open';
+    const STATUS_CLOSE = 'close';
+
+
+    protected $primaryKey = '_id';
+
+    protected $collection = 'playlists';
+
+    protected $fillable = [
+        'created_by',
+
+        '_id',
+        'slug',
+        'name',
+        'status',
+        'user_id',
+         //['created', 'open', 'close'],
+        'songs',
+        'opened_at_dates',
+        'closed_at_dates',
+
+    ];
+
+    /**
+     * Playlist's creator
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
+
+    /**
+     * Playlist's guests
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function guests(){
+        return $this->belongsToMany('App\User', null, 'playlist_as_guest_ids', 'guests_ids');
+    }
+
+    /**
+     * Open playlist set status to open and save de timestamp
+     */
+    public function open(){
+        $this->status = self::STATUS_OPEN;
+        $this->opened_at_dates []= Carbon::now();
+    }
+
+    /**
+     * Open playlist set status to open and save de timestamp
+     */
+    public function close(){
+        $this->status = self::STATUS_OPEN;
+        $this->closed_at_dates []= Carbon::now();
+    }
+
+
+    public function getOpenedAtDates(): Collection{
+        return collect($this->opened_at_dates);
+    }
+
+    public function getClosedAtDates(): Collection{
+        return collect($this->closed_at_dates);
+    }
+
+
+}
