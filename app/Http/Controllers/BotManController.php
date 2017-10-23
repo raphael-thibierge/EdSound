@@ -140,6 +140,71 @@ class BotManController extends Controller
 
         })->middleware($dialogflow);
 
+
+        $botman->hears('spotify.next', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            if (!$user->isLinkedToSpotify()) {
+                $bot->reply('Your spotify account is not linked');
+                return;
+            }
+
+            $api = SpotifyService::createApiForUser($user);
+            $api->next();
+            $bot->reply('Chanson suivante !');
+
+
+        })->middleware($dialogflow);
+
+        $botman->hears('spotify.previous', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            if (!$user->isLinkedToSpotify()) {
+                $bot->reply($user->id);
+                $bot->reply('Your spotify account is not linked');
+                return;
+            }
+
+            $api = SpotifyService::createApiForUser($user);
+            $api->previous();
+            $bot->reply('Chanson précédente !');
+
+
+        })->middleware($dialogflow);
+
+        $botman->hears('playlist.join', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            $extras = $bot->getMessage()->getExtras();
+            $playlistID = $extras['apiParameters']['id'];
+
+            $playlist = Playlist::find($playlistID);
+            if ($playlist === null){
+                $bot->reply('Je n\'ai pas trouvé cette playlist');
+            } else if ($playlist->status === Playlist::STATUS_CLOSE){
+                $bot->reply('Cette playlist est maintenant fermée');
+            } else {
+                $user->playlistAsGuests()->save($playlist);
+                $bot->reply('Ca y est tu peux maintenant ajouter des morceaux !');
+            }
+
+        })->middleware($dialogflow);
+
         // pause
         $botman->hears('spotify.pause', function (BotMan $bot) {
             $bot->types();
@@ -199,19 +264,19 @@ class BotManController extends Controller
             }
 
 
-            $playlist = $user->currentPlaylist()->first();
+            $playlist = $user->currentPlaylist();
             if ($playlist === null) {
                 $bot->reply("Tu dois d'abbord participer à une playlist pour y ajouter des musiques");
             } else {
 
-                $api = SpotifyService::createApiForUser($user);
 
+                $api = SpotifyService::createApiForUser($playlist->user);
                 $extras = $bot->getMessage()->getExtras();
 
                 $id = $extras['apiParameters']['id'];
 
                 // add track to spotify playlist
-                $api->addUserPlaylistTracks($user->getSpotifyId(), $playlist->getSpotifyId(), [$id]);
+                $api->addUserPlaylistTracks($playlist->user->getSpotifyId(), $playlist->getSpotifyId(), [$id]);
 
                 $bot->reply('Your track has been added to the playlist ');
             }
@@ -245,7 +310,8 @@ class BotManController extends Controller
                     'spotify_data' => $playlistData
                 ]);
 
-                $bot->reply('Ta playlist a été crée, voici son identifiant : ' . $playlist->id);
+                $bot->reply('Ta playlist a été crée, voici son identifiant : ');
+                $bot->reply($playlist->id);
             }
 
         })->middleware($dialogflow);
