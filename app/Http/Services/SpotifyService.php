@@ -20,7 +20,7 @@ class SpotifyService
         return  new Session(
             config('services.spotify.key'),
             config('services.spotify.secret'),
-            "https://5e6946ba.ngrok.io/spotify/callback"
+            route('spotify.callback')
         );
     }
 
