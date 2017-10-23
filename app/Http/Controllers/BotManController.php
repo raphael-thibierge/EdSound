@@ -186,6 +186,39 @@ class BotManController extends Controller
 
         })->middleware($dialogflow);
 
+        // search song
+        $botman->hears('playlist.songs.add', function (BotMan $bot) {
+            $bot->types();
+            // The incoming message matched the "input.welcome" on Dialoglfow.com
+            // Retrieve API.ai information:
+
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+
+            $playlist = $user->currentPlaylist()->first();
+            if ($playlist === null) {
+                $bot->reply("Tu dois d'abbord participer à une playlist pour y ajouter des musiques");
+            } else {
+
+                $api = SpotifyService::createApiForUser($user);
+
+                $extras = $bot->getMessage()->getExtras();
+
+                $id = $extras['apiParameters']['id'];
+
+                // add track to spotify playlist
+                $api->addUserPlaylistTracks($user->getSpotifyId(), $playlist->getSpotifyId(), [$id]);
+
+                $bot->reply('Your track has been added to the playlist ');
+            }
+
+
+        })->middleware($dialogflow);
+
         /**
          * Spotify play
          */
@@ -201,9 +234,15 @@ class BotManController extends Controller
                 $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
             } else {
 
+                $name = 'Une première playlist';
+                $api = SpotifyService::createApiForUser($user);
+
+                $playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
+
                 $playlist = $user->playlists()->create([
                     'status' => Playlist::STATUS_OPEN,
-                    'name' => "No name",
+                    'name' => $name,
+                    'spotify_data' => $playlistData
                 ]);
 
                 $bot->reply('Ta playlist a été crée, voici son identifiant : ' . $playlist->id);
@@ -272,7 +311,7 @@ class BotManController extends Controller
             ->image($track->album->images[0]->url)
             //->addButton(ElementButton::create('visit')->url('http://botman.io'))
             ->addButton(ElementButton::create('Ajouter')
-                ->payload('addtrack')->type('postback'))
+                ->payload('playlist.songs.add.' . $track->id)->type('postback'))
             ;
     }
 

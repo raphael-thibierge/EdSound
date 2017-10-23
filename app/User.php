@@ -90,5 +90,15 @@ class User extends \Jenssegers\Mongodb\Auth\User
         return $this->belongsToMany('App\Playlist',  null, 'guests_ids', 'playlist_as_guest_ids');
     }
 
+    public function getSpotifyId(){
+        if ($this->isLinkedToSpotify()){
+            return $this->spotify_user_data['id'];
+        }
+        return "";
+    }
+
+    public function currentPlaylist(): HasMany{
+        return $this->playlists()->where('status', Playlist::STATUS_OPEN);
+    }
 
 }

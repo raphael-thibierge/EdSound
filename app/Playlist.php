@@ -10,6 +10,7 @@ use Jenssegers\Mongodb\Eloquent\Model;
  * @property array opened_at_dates
  * @property array closed_at_dates
  * @property string status
+ * @property string spotify_data
  */
 class Playlist extends Model
 {
@@ -33,6 +34,7 @@ class Playlist extends Model
         'songs',
         'opened_at_dates',
         'closed_at_dates',
+        'spotify_data'
 
     ];
 
@@ -79,6 +81,16 @@ class Playlist extends Model
     public function getClosedAtDates(): Collection{
         return collect($this->closed_at_dates);
     }
+
+    public function getSpotifyId(){
+
+        if (isset($this->spotify_data)){
+            return $this->spotify_data['id'];
+        }
+        return '';
+    }
+
+
 
 
 }
