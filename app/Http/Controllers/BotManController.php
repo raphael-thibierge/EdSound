@@ -87,6 +87,15 @@ class BotManController extends Controller
         /**
          * Login
          */
+        $botman->hears('test', function (BotMan $bot) {
+            $extras = $bot->getMessage()->getExtras();
+            $apiReply = $extras['apiReply'];
+            $bot->reply($apiReply);
+        })->middleware($dialogflow);
+
+        /**
+         * Login
+         */
         $botman->hears('login', function (BotMan $bot) {
             $bot->reply($this->login_button());
         })->middleware($dialogflow);
