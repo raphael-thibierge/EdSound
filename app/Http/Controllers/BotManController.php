@@ -299,7 +299,7 @@ class BotManController extends Controller
                 $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
             } else {
 
-                $name = 'Une première playlist';
+                $name = 'Edgar\'s playlist';
                 $api = SpotifyService::createApiForUser($user);
 
                 $playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
