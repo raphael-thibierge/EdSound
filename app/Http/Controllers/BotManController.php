@@ -211,6 +211,27 @@ class BotManController extends Controller
 
         })->middleware($dialogflow);
 
+        /**
+         * Spotify play
+         */
+        $botman->hears('playlist.id.get', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            $playlist = $user->playlists()->where('status', Playlist::STATUS_OPEN)->first();
+            if ($playlist === null) {
+                $bot->reply("Tu n'as aucune playlist ouverte.");
+            } else {
+
+                $bot->reply('Voici l\'identifiant : ' . $playlist->id);
+            }
+
+        })->middleware($dialogflow);
+
 
         // default response
         $botman->fallback(function (BotMan $bot){
