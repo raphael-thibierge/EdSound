@@ -303,14 +303,14 @@ class BotManController extends Controller
             } else {
 
                 $name = 'Edgar\'s playlist';
-                $api = SpotifyService::createApiForUser($user);
+                //$api = SpotifyService::createApiForUser($user);
 
-                $playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
+                //$playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
 
                 $playlist = $user->playlists()->create([
                     'status' => Playlist::STATUS_OPEN,
                     'name' => $name,
-                    'spotify_data' => $playlistData
+                  //  'spotify_data' => $playlistData
                 ]);
 
                 $bot->reply('Ta playlist a été crée, voici son identifiant : ');
