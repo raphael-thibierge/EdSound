@@ -35,4 +35,9 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'spotify' => [
+        'key' => env('SPOTIFY_CLIENT_ID'),
+        'secret' => env('SPOTIFY_CLIENT_SECRET')
+    ]
+
 ];
