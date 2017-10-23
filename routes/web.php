@@ -21,4 +21,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 
 // botman
+Route::match(['get', 'post'], '/botman', 'BotManController@handle')->middleware('botman');Route::match(['get', 'post'], '/botman', 'BotManController@handle')->middleware('botman');
 Route::match(['get', 'post'], '/botman', 'BotManController@handle')->middleware('botman');

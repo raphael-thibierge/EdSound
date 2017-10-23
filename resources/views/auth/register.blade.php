@@ -11,6 +11,13 @@
                     <form class="form-horizontal" method="POST" action="{{ route('register') }}">
                         {{ csrf_field() }}
 
+                        @if(isset($_REQUEST['redirect_uri']))
+                            <input type="hidden" name="redirect_uri" value="{{ $_REQUEST['redirect_uri'] }}">
+                        @endif
+                        @if(isset($_REQUEST['account_linking_token']))
+                            <input type="hidden" name="account_linking_token" value="{{ $_REQUEST['account_linking_token'] }}">
+                        @endif
+
                         <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
                             <label for="name" class="col-md-4 control-label">Name</label>
 

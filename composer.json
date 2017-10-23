@@ -10,6 +10,7 @@
         "botman/driver-facebook": "^1.2",
         "jenssegers/mongodb": "^3.2",
         "jenssegers/mongodb-sentry": "^1.0",
+        "jwilsson/spotify-web-api-php": "^2.0",
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
         "pusher/pusher-php-server": "~2.6",

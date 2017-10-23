@@ -11,6 +11,13 @@
                     <form class="form-horizontal" method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
 
+                        @if(isset($_REQUEST['redirect_uri']))
+                            <input type="hidden" name="redirect_uri" value="{{ $_REQUEST['redirect_uri'] }}">
+                        @endif
+                        @if(isset($_REQUEST['account_linking_token']))
+                            <input type="hidden" name="account_linking_token" value="{{ $_REQUEST['account_linking_token'] }}">
+                        @endif
+
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                             <label for="email" class="col-md-4 control-label">E-Mail Address</label>
 
@@ -55,9 +62,14 @@
                                     Login
                                 </button>
 
+                                <a class="btn btn-primary" href="/register{{ (isset($_REQUEST['redirect_uri']) ? '?redirect_uri=' . $_REQUEST['redirect_uri'] : '') . (isset($_REQUEST['account_linking_token']) ? '&account_linking_token=' . $_REQUEST['account_linking_token'] : '')}}">
+                                    Create account
+                                </a>
+
                                 <a class="btn btn-link" href="{{ route('password.request') }}">
                                     Forgot Your Password?
                                 </a>
+
                             </div>
                         </div>
                     </form>

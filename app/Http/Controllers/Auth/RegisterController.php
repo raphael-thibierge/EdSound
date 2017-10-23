@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
@@ -20,7 +23,9 @@ class RegisterController extends Controller
     |
     */
 
-    use RegistersUsers;
+    use RegistersUsers {
+        register as protected registerInTrait;
+    }
 
     /**
      * Where to redirect users after registration.
@@ -67,5 +72,24 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+    }
+
+    public function register(Request $request)
+    {
+        // messenger account linking case
+        if ($request->has('redirect_uri') && $request->has('account_linking_token')){
+            // process normal register
+            $response = $this->registerInTrait($request);
+            // if success redirect to messenger
+            if (($user = Auth::user()) != null){
+                return Redirect::to(route('botman.confirm', [
+                    'redirect_uri' => $request->get('redirect_uri'),
+                    'account_linking_token' => $request->get('account_linking_token'),
+                ]));
+            }
+            return $response;
+        }
+
+        return $this->registerInTrait($request);
     }
 }
