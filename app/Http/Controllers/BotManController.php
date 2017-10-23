@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Exceptions\SpotifyAccountNotLinkedException;
 use App\Exceptions\SpotifyNotPremiumException;
 use App\Http\Services\SpotifyService;
+use App\Playlist;
 use App\User;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
+use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Middleware\ApiAi;
 use BotMan\Drivers\Facebook\Extensions\Element;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
@@ -183,6 +185,32 @@ class BotManController extends Controller
 
 
         })->middleware($dialogflow);
+
+        /**
+         * Spotify play
+         */
+        $botman->hears('playlist.create', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            if ($user->playlists()->where('status', Playlist::STATUS_OPEN)->count() > 0) {
+                $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
+            } else {
+
+                $playlist = $user->playlists()->create([
+                    'status' => Playlist::STATUS_OPEN,
+                    'name' => "No name",
+                ]);
+
+                $bot->reply('Ta playlist a été crée, voici son identifiant : ' . $playlist->id);
+            }
+
+        })->middleware($dialogflow);
+
 
         // default response
         $botman->fallback(function (BotMan $bot){
