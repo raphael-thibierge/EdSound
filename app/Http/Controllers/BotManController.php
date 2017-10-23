@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Exceptions\SpotifyAccountNotLinkedException;
 use App\Exceptions\SpotifyNotPremiumException;
 use App\Http\Services\SpotifyService;
+use App\Playlist;
 use App\User;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
+use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Middleware\ApiAi;
 use BotMan\Drivers\Facebook\Extensions\Element;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
@@ -138,6 +140,71 @@ class BotManController extends Controller
 
         })->middleware($dialogflow);
 
+
+        $botman->hears('spotify.next', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            if (!$user->isLinkedToSpotify()) {
+                $bot->reply('Your spotify account is not linked');
+                return;
+            }
+
+            $api = SpotifyService::createApiForUser($user);
+            $api->next();
+            $bot->reply('Chanson suivante !');
+
+
+        })->middleware($dialogflow);
+
+        $botman->hears('spotify.previous', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            if (!$user->isLinkedToSpotify()) {
+                $bot->reply($user->id);
+                $bot->reply('Your spotify account is not linked');
+                return;
+            }
+
+            $api = SpotifyService::createApiForUser($user);
+            $api->previous();
+            $bot->reply('Chanson précédente !');
+
+
+        })->middleware($dialogflow);
+
+        $botman->hears('playlist.join', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            $extras = $bot->getMessage()->getExtras();
+            $playlistID = $extras['apiParameters']['id'];
+
+            $playlist = Playlist::find($playlistID);
+            if ($playlist === null){
+                $bot->reply('Je n\'ai pas trouvé cette playlist');
+            } else if ($playlist->status === Playlist::STATUS_CLOSE){
+                $bot->reply('Cette playlist est maintenant fermée');
+            } else {
+                $user->playlistAsGuests()->save($playlist);
+                $bot->reply('Ca y est tu peux maintenant ajouter des morceaux !');
+            }
+
+        })->middleware($dialogflow);
+
         // pause
         $botman->hears('spotify.pause', function (BotMan $bot) {
             $bot->types();
@@ -184,6 +251,93 @@ class BotManController extends Controller
 
         })->middleware($dialogflow);
 
+        // search song
+        $botman->hears('playlist.songs.add', function (BotMan $bot) {
+            $bot->types();
+            // The incoming message matched the "input.welcome" on Dialoglfow.com
+            // Retrieve API.ai information:
+
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+
+            $playlist = $user->currentPlaylist();
+            if ($playlist === null) {
+                $bot->reply("Tu dois d'abbord participer à une playlist pour y ajouter des musiques");
+            } else {
+
+
+                $api = SpotifyService::createApiForUser($playlist->user);
+                $extras = $bot->getMessage()->getExtras();
+
+                $id = $extras['apiParameters']['id'];
+
+                // add track to spotify playlist
+                $api->addUserPlaylistTracks($playlist->user->getSpotifyId(), $playlist->getSpotifyId(), [$id]);
+
+                $bot->reply('Your track has been added to the playlist ');
+            }
+
+
+        })->middleware($dialogflow);
+
+        /**
+         * Spotify play
+         */
+        $botman->hears('playlist.create', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            if ($user->playlists()->where('status', Playlist::STATUS_OPEN)->count() > 0) {
+                $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
+            } else {
+
+                $name = 'Une première playlist';
+                $api = SpotifyService::createApiForUser($user);
+
+                $playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
+
+                $playlist = $user->playlists()->create([
+                    'status' => Playlist::STATUS_OPEN,
+                    'name' => $name,
+                    'spotify_data' => $playlistData
+                ]);
+
+                $bot->reply('Ta playlist a été crée, voici son identifiant : ');
+                $bot->reply($playlist->id);
+            }
+
+        })->middleware($dialogflow);
+
+        /**
+         * Spotify play
+         */
+        $botman->hears('playlist.id.get', function (BotMan $bot) {
+            $bot->types();
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('You are not connected');
+                return;
+            }
+
+            $playlist = $user->playlists()->where('status', Playlist::STATUS_OPEN)->first();
+            if ($playlist === null) {
+                $bot->reply("Tu n'as aucune playlist ouverte.");
+            } else {
+
+                $bot->reply('Voici l\'identifiant : ' . $playlist->id);
+            }
+
+        })->middleware($dialogflow);
+
+
         // default response
         $botman->fallback(function (BotMan $bot){
             $bot->reply("I didn't get that..");
@@ -223,7 +377,7 @@ class BotManController extends Controller
             ->image($track->album->images[0]->url)
             //->addButton(ElementButton::create('visit')->url('http://botman.io'))
             ->addButton(ElementButton::create('Ajouter')
-                ->payload('addtrack')->type('postback'))
+                ->payload('playlist.songs.add.' . $track->id)->type('postback'))
             ;
     }
 

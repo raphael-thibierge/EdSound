@@ -79,9 +79,9 @@ class User extends \Jenssegers\Mongodb\Auth\User
         $secondUser->playlists()->update(['created_by_user_id' => $secondUser]);
 
         // merge playlists as guests
-        foreach ($secondUser->asGuestPlaylists as $playlist){
-            $secondUser->asGuestPlaylists()->dissociate($playlist);
-            $this->asGuestPlaylists()->associate($playlist);
+        foreach ($secondUser->playlist_as_guest_ids as $playlist){
+            $secondUser->playlistAsGuests()->dissociate($playlist);
+            $this->playlistAsGuests()->associate($playlist);
         }
 
     }
@@ -90,5 +90,19 @@ class User extends \Jenssegers\Mongodb\Auth\User
         return $this->belongsToMany('App\Playlist',  null, 'guests_ids', 'playlist_as_guest_ids');
     }
 
+    public function getSpotifyId(){
+        if ($this->isLinkedToSpotify()){
+            return $this->spotify_user_data['id'];
+        }
+        return "";
+    }
+
+    public function currentPlaylist(){
+        $asHost = $this->playlists()->where('status', Playlist::STATUS_OPEN)->first();
+        if ($asHost === null){
+            $asHost = $this->playlistAsGuests()->where('status', Playlist::STATUS_OPEN)->first();
+        }
+        return $asHost;
+    }
 
 }
