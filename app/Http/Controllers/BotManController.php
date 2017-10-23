@@ -209,6 +209,9 @@ class BotManController extends Controller
         $botman->hears('spotify.pause', function (BotMan $bot) {
             $bot->types();
 
+
+            $bot->reply('Music is paused !');
+            return;
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
                 $bot->reply('You are not connected');
