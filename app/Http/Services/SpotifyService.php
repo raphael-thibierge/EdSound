@@ -20,7 +20,7 @@ class SpotifyService
         return  new Session(
             config('services.spotify.key'),
             config('services.spotify.secret'),
-            route('spotify.callback')
+            env('APP_URL') . "/spotify/callback"
         );
     }
 
