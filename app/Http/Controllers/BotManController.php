@@ -43,7 +43,7 @@ class BotManController extends Controller
     }
 
     public function notLinkedSpotifyAnswer(Botman $bot){
-        $bot->reply('Tu dois d\'abbord connecter ton compte spotidy pour créer une playlist');
+        $bot->reply('Tu dois d\'abbord connecter ton compte spotify pour créer une playlist');
         $bot->reply($this->link_spotify_button());
     }
 
