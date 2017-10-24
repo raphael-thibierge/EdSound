@@ -42,6 +42,11 @@ class BotManController extends Controller
         return $user;
     }
 
+    public function notLinkedSpotifyAnswer(Botman $bot){
+        $bot->reply('Tu dois d\'abbord connecter ton compte spotidy pour créer une playlist');
+        $bot->reply($this->link_spotify_button());
+    }
+
     public function handle(Request $request){
 
         // Use Facebook messenger driver
@@ -128,8 +133,8 @@ class BotManController extends Controller
             }
 
             if (!$user->isLinkedToSpotify()) {
-                $bot->reply($user->id);
-                $bot->reply('Your spotify account is not linked');
+                $this->notLinkedSpotifyAnswer($bot);
+
                 return;
             }
 
@@ -150,7 +155,7 @@ class BotManController extends Controller
             }
 
             if (!$user->isLinkedToSpotify()) {
-                $bot->reply('Your spotify account is not linked');
+                $this->notLinkedSpotifyAnswer($bot);
                 return;
             }
 
@@ -170,8 +175,7 @@ class BotManController extends Controller
             }
 
             if (!$user->isLinkedToSpotify()) {
-                $bot->reply($user->id);
-                $bot->reply('Your spotify account is not linked');
+                $this->notLinkedSpotifyAnswer($bot);
                 return;
             }
 
@@ -216,7 +220,7 @@ class BotManController extends Controller
             }
 
             if (!$user->isLinkedToSpotify()) {
-                $bot->reply('Your spotify account is not linked');
+                $this->notLinkedSpotifyAnswer($bot);
                 return;
             }
 
@@ -297,21 +301,24 @@ class BotManController extends Controller
 
             if ($user->playlists()->where('status', Playlist::STATUS_OPEN)->count() > 0) {
                 $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
+            } else if (!$user->isLinkedToSpotify()) {
+                $this->notLinkedSpotifyAnswer($bot);
+                return;
             } else {
+                    $name = 'Edgar\'s playlist';
+                    $api = SpotifyService::createApiForUser($user);
 
-                $name = 'Edgar\'s playlist';
-                $api = SpotifyService::createApiForUser($user);
+                    $playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
 
-                $playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
+                    $playlist = $user->playlists()->create([
+                        'status' => Playlist::STATUS_OPEN,
+                        'name' => $name,
+                        'spotify_data' => $playlistData
+                    ]);
 
-                $playlist = $user->playlists()->create([
-                    'status' => Playlist::STATUS_OPEN,
-                    'name' => $name,
-                    'spotify_data' => $playlistData
-                ]);
+                    $bot->reply('Ta playlist a été crée, voici son identifiant : ');
+                    $bot->reply($playlist->id);
 
-                $bot->reply('Ta playlist a été crée, voici son identifiant : ');
-                $bot->reply($playlist->id);
             }
 
         })->middleware($dialogflow);
