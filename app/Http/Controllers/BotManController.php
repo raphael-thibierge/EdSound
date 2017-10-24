@@ -463,7 +463,7 @@ class BotManController extends Controller
                 Element::create('Spotify')
                     ->subtitle('Connectes ton compte spotify')
                     ->addButton(
-                        ElementButton::create('Connect')
+                        ElementButton::create('Connexion')
                             ->url(route('spotify.login'))
                     )
             ]);
