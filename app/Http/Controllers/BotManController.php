@@ -89,6 +89,10 @@ class BotManController extends Controller
             $apiParameters = $extras['apiParameters'];
 
             $bot->reply($apiReply);
+            if ($this->getUserFromSenderId($bot->getUser()->getId()) === null){
+                $bot->reply('Crées toi un compte ici, c\'est entièrement gratuit !');
+                $bot->reply($this->login_button());
+            }
         })->middleware($dialogflow);
 
         /**
