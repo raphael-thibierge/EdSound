@@ -128,7 +128,7 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -140,7 +140,7 @@ class BotManController extends Controller
 
             $api = SpotifyService::createApiForUser($user);
             $api->play();
-            $bot->reply('Music is playing !');
+            $bot->reply('Ca y est, la musique est lancée !');
 
 
         })->middleware($dialogflow);
@@ -150,7 +150,7 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -170,7 +170,7 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -190,7 +190,7 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -215,7 +215,7 @@ class BotManController extends Controller
 
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -226,7 +226,7 @@ class BotManController extends Controller
 
             $api = SpotifyService::createApiForUser($user);
             $api->pause();
-            $bot->reply('Music is paused !');
+            $bot->reply('La playlist est sur pause!');
 
 
         })->middleware($dialogflow);
@@ -263,7 +263,7 @@ class BotManController extends Controller
 
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -282,7 +282,7 @@ class BotManController extends Controller
                 // add track to spotify playlist
                 $api->addUserPlaylistTracks($playlist->user->getSpotifyId(), $playlist->getSpotifyId(), [$id]);
 
-                $bot->reply('Your track has been added to the playlist ');
+                $bot->reply('Morceau ajouté à la playlist !');
             }
 
 
@@ -295,7 +295,7 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
@@ -316,7 +316,7 @@ class BotManController extends Controller
                         'spotify_data' => $playlistData
                     ]);
 
-                    $bot->reply('Ta playlist a été crée, voici son identifiant : ');
+                    $bot->reply('Ta playlist a été créée, voici son identifiant : ');
                     $bot->reply($playlist->id);
 
             }
@@ -330,13 +330,13 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
             if ($user === null) {
-                $bot->reply('You are not connected');
+                $this->notConnectedMessage($bot);
                 return;
             }
 
             $playlist = $user->playlists()->where('status', Playlist::STATUS_OPEN)->first();
             if ($playlist === null) {
-                $bot->reply("Tu n'as aucune playlist ouverte.");
+                $bot->reply("Tu n'as aucune playlist ouverte. Crées en une !");
             } else {
 
                 $bot->reply('Voici l\'identifiant : ' . $playlist->id);
@@ -347,16 +347,21 @@ class BotManController extends Controller
 
         // default response
         $botman->fallback(function (BotMan $bot){
-            $bot->reply("I didn't get that..");
+            $bot->reply("Je n'ai pas compris... :/");
         });
 
         // start listening
         $botman->listen();
     }
 
+    public function notConnectedMessage(Botman $bot){
+        $bot->reply('Tu n\'es pas connecté');
+        $bot->reply($this->login_button());
+    }
+
     public function songListTemplate($tracks){
         if (count($tracks) == 0){
-            return "No track found";
+            return "Aucun morceau trouvé..";
         }
 
         $trackTemplates = [];
@@ -391,8 +396,8 @@ class BotManController extends Controller
     private function login_button(){
         return GenericTemplate::create()
             ->addElements([
-                Element::create('Account linking')
-                    ->subtitle('Link your Sir Edgar account')
+                Element::create('Connexion')
+                    ->subtitle('Connecte ton compte ' . env('APP_NAME') . ' ou crées toi en un !')
                     ->addButton(
                         ElementButton::create('Login')
                             ->url(env('APP_URL') . '/botman/authorize')
@@ -404,9 +409,9 @@ class BotManController extends Controller
     private function logout_button(){
         return GenericTemplate::create()
             ->addElements([
-                Element::create('Unlink account')
+                Element::create('Dissociation du compte ' . env('APP_NAME'))
                     ->addButton(
-                        ElementButton::create('Log Out')
+                        ElementButton::create('Déconnexion')
                             ->type('account_unlink')
                     )
             ]);
@@ -436,7 +441,7 @@ class BotManController extends Controller
 
                     $user->update(['messenger_sender_id' => $sender_id]);
 
-                    $botman->say("Wecome {$user->name} ! You're account has been successfully linked",
+                    $botman->say("Bienvenue {$user->name} ! Ton compte messenger est maitenant lié avec " . env('APP_NAME'),
                         $sender_id);
                 }
             }
@@ -444,18 +449,19 @@ class BotManController extends Controller
             else if ($account_linking['status'] === "unlinked") {
                 User::where('messenger_sender_id', $sender_id)->update(['messenger_sender_id' => null]);
 
-                $botman->say("Your account has been successfully unlinked !",
+                $botman->say("Ton compte messenger n'est plus lié à ". env('APP_NAME'),
                     $sender_id);
             }
         }
     }
+
 
     private function link_spotify_button()
     {
         return GenericTemplate::create()
             ->addElements([
                 Element::create('Spotify')
-                    ->subtitle('Connect your spotify')
+                    ->subtitle('Connectes ton compte spotify')
                     ->addButton(
                         ElementButton::create('Connect')
                             ->url(route('spotify.login'))
