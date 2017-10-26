@@ -46,6 +46,8 @@ class SpotifyService
 
     public static function createApiForUser(User $user): SpotifyWebAPI{
         $session = self::createSession();
+        $session->refreshAccessToken($user->spotify_refresh_token);
+        $user->spotify_access_token = $session->getAccessToken();
         $api = new SpotifyWebAPI();
         $api->setAccessToken($user->spotify_access_token);
         return $api;

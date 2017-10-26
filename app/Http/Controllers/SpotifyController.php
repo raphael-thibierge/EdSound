@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\SpotifyService;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use SpotifyWebAPI\SpotifyWebAPI;
@@ -15,10 +16,12 @@ class SpotifyController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
-    public function login(Request $request){
+    public function login(Request $request, User $user){
+
+        session()->flash('user_id', $user->id);
 
         $session = SpotifyService::createSession();
 
@@ -61,7 +64,10 @@ class SpotifyController extends Controller
         $api->setReturnType(SpotifyWebAPI::RETURN_ASSOC);
 
         // store user data
-        $user = Auth::user();
+
+
+        $user_id = session()->get('user_id');
+        $user = User::find($user_id);
         $user->spotify_access_token = $accessToken;
         $user->spotify_refresh_token = $refreshToken;
         $user->spotify_user_data = $api->me();

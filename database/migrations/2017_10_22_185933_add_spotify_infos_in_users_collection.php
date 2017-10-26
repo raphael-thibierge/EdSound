@@ -27,6 +27,10 @@ class AddSpotifyInfosInUsersCollection extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('users', function (Blueprint $table){
+            $table->dropColumn('spotify_access_token');
+            $table->dropColumn('spotify_refresh_token');
+            $table->dropColumn('spotify_user_data');
+        });
     }
 }

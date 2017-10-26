@@ -24,7 +24,7 @@ Route::get('/privacy-policy', 'HomeController@privacyPolicy')->name('privacy.pol
 Route::match(['get', 'post'], '/botman', 'BotManController@handle')->middleware('botman');
 
 
-Route::get('/spotify/login', 'SpotifyController@login')->name('spotify.login');
+Route::get('/spotify/login/{user}', 'SpotifyController@login')->name('spotify.login');
 Route::match(['get', 'post'], '/spotify/callback', 'SpotifyController@callback')->name('spotify.callback');
 
 

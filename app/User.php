@@ -8,8 +8,10 @@ use Jenssegers\Mongodb\Relations\HasMany;
 
 /**
  * @property string spotify_access_token
+ * @property string spotify_refresh_token
  * @property string messenger_sender_id
  * @property array asGuestPlaylists
+ * @property string id
  */
 class User extends \Jenssegers\Mongodb\Auth\User
 {
