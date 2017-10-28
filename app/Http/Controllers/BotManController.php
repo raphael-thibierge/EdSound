@@ -283,6 +283,26 @@ class BotManController extends Controller
 
         })->middleware($dialogflow);
 
+        $botman->hears('playlist.songs.current', function (BotMan $bot) {
+            $bot->types();
+            // The incoming message matched the "input.welcome" on Dialoglfow.com
+            // Retrieve API.ai information:
+
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+
+
+            $playlist = $user->currentPlaylist();
+            if ($playlist === null) {
+                $bot->reply("Tu dois d'abbord créer une playlist pour y ajouter des musiques");
+            } else {
+
+
+                $bot->reply($this->songTemplate($playlist->currentSong()->item));
+            }
+
+
+        })->middleware($dialogflow);
+
         // search song
         $botman->hears('playlist.songs', function (BotMan $bot) {
             $bot->types();
@@ -391,6 +411,7 @@ class BotManController extends Controller
         $botman->fallback(function (BotMan $bot){
             $bot->reply("Je n'ai pas compris... :/");
         });
+
 
         // start listening
         $botman->listen();
