@@ -127,5 +127,9 @@ class Playlist extends Model
         return '';
     }
 
+    public function currentSong(){
+        return $this->user->getUserSpotifyApiAccess()->getMyCurrentTrack();
+    }
+
 
 }
