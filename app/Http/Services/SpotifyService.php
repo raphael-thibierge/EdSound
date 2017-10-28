@@ -16,6 +16,35 @@ use SpotifyWebAPI\Session;
 class SpotifyService
 {
 
+
+    public static function loginRequest(): string{
+
+        $session = SpotifyService::createSession();
+        $options = [
+            'scope' => [
+                'user-read-private',
+
+                // playlists
+                'playlist-read-private',
+                'playlist-read-collaborative',
+                'playlist-modify-public',
+                'playlist-modify-private',
+                // user infos
+                'user-read-email',
+                'user-read-birthdate',
+                'user-top-read',
+                // user's player
+                'user-read-playback-state', // access to user's player
+                'user-modify-playback-state',
+                'user-read-currently-playing',
+                'user-read-recently-played'
+            ],
+        ];
+
+        return $session->getAuthorizeUrl($options);
+    }
+
+
     public static function createSession(): Session {
         return  new Session(
             config('services.spotify.key'),
@@ -36,6 +65,7 @@ class SpotifyService
         $session->requestCredentialsToken();
         $accessToken = $session->getAccessToken();
 
+        $session->getTokenExpiration();
         // Fetch the saved access token from somewhere. A database for example.
 
         $api = new SpotifyWebAPI();
@@ -47,7 +77,18 @@ class SpotifyService
     public static function createApiForUser(User $user): SpotifyWebAPI{
         $session = self::createSession();
         $session->refreshAccessToken($user->spotify_refresh_token);
+
         $user->spotify_access_token = $session->getAccessToken();
+
+        echo $session->getTokenExpiration();
+        $refreshToken = $session->getRefreshToken();
+        //if (^e !== ""){
+
+        //}
+        $user->save();
+
+
+
         $api = new SpotifyWebAPI();
         $api->setAccessToken($user->spotify_access_token);
         return $api;

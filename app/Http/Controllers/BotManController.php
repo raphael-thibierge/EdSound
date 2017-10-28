@@ -259,17 +259,12 @@ class BotManController extends Controller
                 $extras = $bot->getMessage()->getExtras();
                 $trackId = $extras['apiParameters']['id'];
 
-                $api = SpotifyService::load();
-                $song = $api->getTrack($trackId);
 
-
-                $playlist->songs()->create([
-                    'submitter_id' => $user->id,
-                    'spotify_data' => $song,
-                ]);
-
-                // add track to spotify playlist
-                //$api->addUserPlaylistTracks($playlist->user->getSpotifyId(), $playlist->getSpotifyId(), [$id]);
+                try {
+                    $playlist->addSong($trackId, $user);
+                } catch (SpotifyAccountNotLinkedException $exception){
+                    return 'Error while trying to add playlist';
+                }
 
                 $bot->reply('Morceau ajouté à la playlist !');
             }
@@ -321,27 +316,21 @@ class BotManController extends Controller
             $bot->types();
             $user = $this->getUserFromSenderId($bot->getUser()->getId());
 
-            if ($user->playlists()->where('status', Playlist::STATUS_OPEN)->count() > 0) {
+            if ($user->currentPlaylist() !== null) {
                 $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
-            } /*else if (!$user->isLinkedToSpotify()) {
-                $this->notLinkedSpotifyAnswer($bot);
-                return;
-            }*/ else {
-                $name = 'Edgar\'s playlist test! ';
-               // $api = SpotifyService::createApiForUser($user);
+            } else {
 
-                //$playlistData = $api->createUserPlaylist($user->getSpotifyId(), ['name' => $name] );
+                try {
+                    $playlist = $user->createAndOpenPlaylist();
 
-                $playlist = Playlist::create([
-                    'name' => $name,
-                    //'spotify_data' => $playlistData
-                ]);
+                    $bot->reply('Ta playlist a été créée, tu peux maintenant ajouter des musiques'/*, voici son identifiant : '*/);
+                    $bot->reply($playlist->id);
 
-                $playlist->open();
-                $playlist = $user->playlists()->save($playlist);
+                } catch (SpotifyAccountNotLinkedException $exception){
+                    $bot->reply($this->notLinkedSpotifyAnswer($bot));
+                }
 
-                $bot->reply('Ta playlist a été créée, tu peux maintenant ajouter des musiques'/*, voici son identifiant : '*/);
-                //$bot->reply($playlist->id);
+
             }
 
         })->middleware($dialogflow);

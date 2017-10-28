@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Http\Services\SpotifyService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Jenssegers\Mongodb\Eloquent\Model;
@@ -12,6 +13,7 @@ use Jenssegers\Mongodb\Relations\EmbedsMany;
  * @property array closed_at_dates
  * @property string status
  * @property string spotify_data
+ * @property User user
  */
 class Playlist extends Model
 {
@@ -25,7 +27,6 @@ class Playlist extends Model
 
     protected $fillable = [
         'created_by',
-
         '_id',
         'slug',
         'name',
@@ -72,8 +73,18 @@ class Playlist extends Model
      * Open playlist set status to open and save de timestamp
      */
     public function open(){
+
         $this->status = self::STATUS_OPEN;
-        //$this->opened_at_dates []= Carbon::now();
+        // $this->opened_at_dates []= Carbon::now();
+
+        // get creator
+        $api = $this->user->getUserSpotifyApiAccess();
+
+        // create the spotify playlist
+        $this->spotify_data = $api->createUserPlaylist($this->user->getSpotifyId(),
+            ['name' => Carbon::now()->toDateString()]
+        );
+
     }
 
     /**
@@ -82,6 +93,21 @@ class Playlist extends Model
     public function close(){
         $this->status = self::STATUS_CLOSE;
         //$this->closed_at_dates []= Carbon::now();
+
+    }
+
+    public function addSong(string $trackId, User $submitter){
+
+        $api = $this->user->getUserSpotifyApiAccess();
+
+        $this->songs()->create([
+            'submitter_id' => $submitter->id,
+            'spotify_data' => $api->getTrack($trackId),
+        ]);
+
+        // add track to spotify playlist
+        $api->addUserPlaylistTracks($this->user->getSpotifyId(), $this->getSpotifyId(), [$trackId]);
+
     }
 
 
@@ -100,8 +126,6 @@ class Playlist extends Model
         }
         return '';
     }
-
-
 
 
 }

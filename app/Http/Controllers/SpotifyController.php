@@ -19,35 +19,11 @@ class SpotifyController extends Controller
         //$this->middleware('auth');
     }
 
-    public function login(Request $request, User $user){
+    public function login(User $user){
 
         session()->flash('user_id', $user->id);
 
-        $session = SpotifyService::createSession();
-
-        $options = [
-            'scope' => [
-                'user-read-private',
-
-                // playlists
-                'playlist-read-private',
-                'playlist-read-collaborative',
-                'playlist-modify-public',
-                'playlist-modify-private',
-                // user infos
-                'user-read-email',
-                'user-read-birthdate',
-                'user-top-read',
-                // user's player
-                'user-read-playback-state', // access to user's player
-                'user-modify-playback-state',
-                'user-read-currently-playing',
-                'user-read-recently-played'
-            ],
-        ];
-
-        return redirect($session->getAuthorizeUrl($options));
-
+        return redirect(SpotifyService::loginRequest());
     }
 
     public function callback(Request $request){
@@ -58,6 +34,7 @@ class SpotifyController extends Controller
 
         $accessToken = $session->getAccessToken();
         $refreshToken = $session->getRefreshToken();
+        $expiration = $session->getTokenExpiration();
 
         $api = new SpotifyWebAPI();
         $api->setAccessToken($accessToken);
@@ -70,6 +47,7 @@ class SpotifyController extends Controller
         $user = User::find($user_id);
         $user->spotify_access_token = $accessToken;
         $user->spotify_refresh_token = $refreshToken;
+        $user->spotify_token_expiration = $expiration;
         $user->spotify_user_data = $api->me();
         $user->save();
 
