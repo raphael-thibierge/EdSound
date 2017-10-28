@@ -50,3 +50,4 @@ Route::post('/botman/confirm', 'MessengerAccountLinkingController@confirm')
  * Playlist routes
  */
 Route::resource('playlist', 'PlaylistController');
+Route::get('/playlist/{playlist}/data', 'PlaylistController@data')->name('playlist.data');

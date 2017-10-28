@@ -1,5 +1,5 @@
 import React from 'react';
-
+import PlaylistRoot from './components/playlists/PlaylistRoot'
 
 export default class AppRoot extends React.Component {
 
@@ -23,7 +23,8 @@ export default class AppRoot extends React.Component {
 
 
         return (
-            <p>React installed</p>
+            
+            <PlaylistRoot/>
         );
     }
 

@@ -20,6 +20,15 @@ class Song extends Model
 
     ];
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'humanDuration',
+    ];
+
 
     public function submitter(){
         return $this->belongsTo('App\User');
@@ -48,6 +57,10 @@ class Song extends Model
         $seconds = $initial % 60;
         $minutes = ($initial - $seconds ) / 60;
         return $minutes . ':' . $seconds;
+    }
+
+    public function getHumanDurationAttribute(){
+        return $this->getDurationToHuman();
     }
 
 

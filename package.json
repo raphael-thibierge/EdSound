@@ -20,7 +20,9 @@
     "vue": "^2.1.10"
   },
   "dependencies": {
+    "bootstrap": "^4.0.0-beta",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "react-dom": "^16.0.0",
+    "reactstrap": "^5.0.0-alpha.3"
   }
 }

@@ -3,10 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Playlist;
+use App\User;
 use Illuminate\Http\Request;
 
 class PlaylistController extends Controller
 {
+
+    public function data(Playlist $playlist){
+        return $this->successResponse([
+            'playlist' => $playlist
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -46,7 +54,9 @@ class PlaylistController extends Controller
      */
     public function show(Playlist $playlist)
     {
-        //
+        return view('playlists.show', [
+            'playlist' => $playlist
+        ]);
     }
 
     /**

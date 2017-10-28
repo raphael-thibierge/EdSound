@@ -12,6 +12,7 @@ use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Middleware\ApiAi;
+use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\Element;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
@@ -314,25 +315,10 @@ class BotManController extends Controller
                 $bot->reply("Tu dois d'abbord céer une playlist pour y ajouter des musiques");
             } else {
 
-                //$extras = $bot->getMessage()->getExtras();
-                //$trackId = $extras['apiParameters']['id'];
+                $bot->reply(ButtonTemplate::create('Click sur ce bouton frère !')
+                    ->addButton(ElementButton::create('Voir')->url(route('playlist.show', ['playlist' => $playlist])))
+                );
 
-                //$api = SpotifyService::load();
-                //$song = $api->getTrack($trackId);
-
-
-                $songs = $playlist->songs()->get();
-
-                $reply = "";
-                if (count($songs )=== 0){
-                    $reply = "Il n'y a pas encore de morceau dans cette playlist";
-                } else {
-                    foreach ($songs as $song) {
-                        $reply .= ' - ' . $song->getName() . '  (' . $song->getDurationToHuman() . ")\r\n";
-                    }
-                }
-
-                $bot->reply($reply);
             }
 
 
