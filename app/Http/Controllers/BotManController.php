@@ -90,6 +90,17 @@ class BotManController extends Controller
             }
         })->middleware($dialogflow);
 
+        $botman->hears('dialog', function (BotMan $bot){
+
+            // The incoming message matched the "input.welcome" on Dialoglfow.com
+            // Retrieve API.ai information:
+            $extras = $bot->getMessage()->getExtras();
+            $dialogflowReply = $extras['apiReply'];
+
+            $bot->reply($dialogflowReply);
+
+        })->middleware($dialogflow);
+
         /**
          * Test
          */
