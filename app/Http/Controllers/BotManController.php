@@ -296,8 +296,7 @@ class BotManController extends Controller
                 $bot->reply("Tu dois d'abbord créer une playlist pour y ajouter des musiques");
             } else {
 
-
-                $bot->reply($this->songTemplate($playlist->currentSong()->item));
+                $bot->reply($this->uniqueSongTemplate($playlist->currentSong()->item, false));
             }
 
 
@@ -437,7 +436,11 @@ class BotManController extends Controller
             ->addElements($trackTemplates);
     }
 
-    public function songTemplate($track){
+    public function uniqueSongTemplate($track, $addButton = true){
+        return GenericTemplate::create()->addElement($this->songTemplate($track, $addButton));
+    }
+
+    public function songTemplate($track, $addButton = true){
 
         $initial = (int)($track->duration_ms/1000);
         $seconds = $initial % 60;
@@ -446,13 +449,16 @@ class BotManController extends Controller
 
         $artist = $track->artists[0]->name;
 
-        return Element::create("{$track->name} ({$duration})")
+        $element =  Element::create("{$track->name} ({$duration})")
             ->subtitle($artist)
-            ->image($track->album->images[0]->url)
+            ->image($track->album->images[0]->url);
             //->addButton(ElementButton::create('visit')->url('http://botman.io'))
-            ->addButton(ElementButton::create('Ajouter')
-                ->payload('playlist.songs.add.' . $track->id)->type('postback'))
-            ;
+        if ($addButton) {
+            $element->addButton(ElementButton::create('Ajouter')
+                ->payload('playlist.songs.add.' . $track->id)->type('postback'));
+        }
+
+        return $element;
     }
 
     private function login_button(){
