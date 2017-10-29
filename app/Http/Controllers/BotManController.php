@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\SpotifyAccountNotLinkedException;
 use App\Exceptions\SpotifyNotPremiumException;
+use App\Http\Services\BotmanService;
 use App\Http\Services\SpotifyService;
 use App\Playlist;
 use App\User;
@@ -48,24 +49,13 @@ class BotManController extends Controller
         $bot->reply($this->link_spotify_button($this->getUserFromSenderId($bot->getUser()->getId())));
     }
 
+
+
     public function handle(Request $request){
 
-        // Use Facebook messenger driver
-        DriverManager::loadDriver(FacebookDriver::class);
+        $botman = BotmanService::instance();
 
-        // Define botman config
-        $config = [
-            'facebook' => [
-                'token' => env('FACEBOOK_TOKEN'),
-                'app_secret' => env('FACEBOOK_APP_SECRET'),
-                'verification' => env('FACEBOOK_VERIFICATION'),
-            ]
-        ];
-
-        // Create BotMan instance
-        $botman = BotManFactory::create($config);
-
-        // Dialogflow API
+            // Dialogflow API
         $dialogflow = ApiAi::create(env('DIALOGFLOW_API_KEY'))->listenForAction();
 
 
