@@ -46,10 +46,28 @@ class BotManController extends Controller
 
     public function notLinkedSpotifyAnswer(Botman $bot){
         $bot->reply('Tu dois d\'abbord connecter ton compte spotify pour créer une playlist');
-        $bot->reply($this->link_spotify_button($this->getUserFromSenderId($bot->getUser()->getId())));
+        $bot->reply($this->link_spotify_button());
     }
 
 
+    public function getUser(BotMan &$bot){
+        $bot->types();
+        $this->user = $this->getUserFromSenderId($bot->getUser()->getId());
+    }
+
+    public function dialogflowResponse(BotMan &$bot){
+        $bot->reply($bot->getMessage()->getExtras()['apiReply']);
+    }
+
+    private function getDialogflowParameter(BotMan &$bot, string $parameter){
+        $extras = $bot->getMessage()->getExtras()['apiParameters'];
+        if (isset($extras[$parameter]) && !empty($extras[$parameter])){
+            return $extras[$parameter];
+        } else {
+            return null;
+        }
+
+    }
 
     public function handle(Request $request){
 
@@ -64,318 +82,152 @@ class BotManController extends Controller
 
         // welcome intent action
         $botman->hears('input.welcome', function (BotMan $bot) use ($request){
-
-            // The incoming message matched the "input.welcome" on Dialoglfow.com
-            // Retrieve API.ai information:
-            $extras = $bot->getMessage()->getExtras();
-
-            // response content
-            $apiReply = $extras['apiReply'];
-            $apiAction = $extras['apiAction'];
-            $apiIntent = $extras['apiIntent'];
-            $apiParameters = $extras['apiParameters'];
-
-            $bot->reply($apiReply);
-            if ($this->getUserFromSenderId($bot->getUser()->getId()) === null){
-                $bot->reply('Bienvenue ! ');
-            }
+            $this->getUser($bot);
+            $this->dialogflowResponse($bot);
         })->middleware($dialogflow);
+
 
         $botman->hears('dialog', function (BotMan $bot){
-
-            // The incoming message matched the "input.welcome" on Dialoglfow.com
-            // Retrieve API.ai information:
-            $extras = $bot->getMessage()->getExtras();
-            $dialogflowReply = $extras['apiReply'];
-
-            $bot->reply($dialogflowReply);
-
+            $this->getUser($bot);
+            $this->dialogflowResponse($bot);
         })->middleware($dialogflow);
 
-        /**
-         * Test
-         */
+
         $botman->hears('test', function (BotMan $bot) {
-            $extras = $bot->getMessage()->getExtras();
-            $apiReply = $extras['apiReply'];
-            $bot->reply($apiReply);
+            $this->getUser($bot);
+            $this->dialogflowResponse($bot);
         })->middleware($dialogflow);
 
-        /**
-         * Login
-         */
-        //$botman->hears('login', function (BotMan $bot) {
-        //    $bot->reply($this->login_button());
-        //})->middleware($dialogflow);
 
-        /**
-         * Logout
-         */
-        //$botman->hears('logout', function (BotMan $bot) {
-        //    $bot->reply($this->logout_button());
-        //})->middleware($dialogflow);
-
-        /**
-         * Spotify connect
-         */
         $botman->hears('spotify.connect', function (BotMan $bot) {
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
-            $bot->reply($this->link_spotify_button($user));
+            $this->getUser($bot);
+            $bot->reply($this->link_spotify_button());
         })->middleware($dialogflow);
 
-        /**
-         * Spotify play
-         */
-        $botman->hears('spotify.play', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
-
-            if (!$user->isLinkedToSpotify()) {
-                $this->notLinkedSpotifyAnswer($bot);
-
-                return;
-            }
-
-            $api = SpotifyService::createApiForUser($user);
-            $api->play();
-            $bot->reply('Ca y est, la musique est lancée !');
-
-
-        })->middleware($dialogflow);
-
-
-        $botman->hears('spotify.next', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
-
-            if (!$user->isLinkedToSpotify()) {
-                $this->notLinkedSpotifyAnswer($bot);
-                return;
-            }
-
-            $api = SpotifyService::createApiForUser($user);
-            $api->next();
-            $bot->reply('Chanson suivante !');
-
-
-        })->middleware($dialogflow);
-
-        $botman->hears('spotify.previous', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
-
-            if (!$user->isLinkedToSpotify()) {
-                $this->notLinkedSpotifyAnswer($bot);
-                return;
-            }
-
-            $api = SpotifyService::createApiForUser($user);
-            $api->previous();
-            $bot->reply('Chanson précédente !');
-
-
-        })->middleware($dialogflow);
 
         $botman->hears('playlist.join', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            $this->getUser($bot);
 
-            $extras = $bot->getMessage()->getExtras();
-            $playlistID = $extras['apiParameters']['id'];
+            $playlist = Playlist::find($this->getDialogflowParameter($bot, 'id'));
 
-
-            if ($user->currentPlaylist() !== null){
-                $bot->reply('Tu participe déjà à une playlist! Tu dois d\'abbord la quitter avant d\'en joindre une autre' );
-                return;
-            }
-
-
-            $playlist = Playlist::find($playlistID);
             if ($playlist === null){
-                $bot->reply('Je n\'ai pas trouvé cette playlist');
+                $bot->reply("Je n'ai pas trouvé cette playlist");
             } else if ($playlist->status === Playlist::STATUS_CLOSE){
                 $bot->reply('Cette playlist est maintenant fermée');
             } else {
-                $user->playlistAsGuests()->save($playlist);
+                $this->user->playlistAsGuests()->save($playlist);
+                $this->user->setCurrentPlaylist($playlist->id);
+                $this->user->save();
                 $bot->reply('Ca y est tu peux maintenant ajouter des morceaux !');
             }
-
         })->middleware($dialogflow);
-
-        // pause
-        $botman->hears('spotify.pause', function (BotMan $bot) {
-            $bot->types();
-
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
-
-            if (!$user->isLinkedToSpotify()) {
-                $this->notLinkedSpotifyAnswer($bot);
-                return;
-            }
-
-            $api = SpotifyService::createApiForUser($user);
-            $api->pause();
-            $bot->reply('La playlist est sur pause!');
-
-
-        })->middleware($dialogflow);
-
 
         // search song
         $botman->hears('song.search', function (BotMan $bot) {
-            $bot->types();
-            // The incoming message matched the "input.welcome" on Dialoglfow.com
-            // Retrieve API.ai information:
-            $extras = $bot->getMessage()->getExtras();
-            $apiReply = $extras['apiReply'];
 
-            // response content
-            $apiAction = $extras['apiAction'];
-            $apiIntent = $extras['apiIntent'];
-            $apiParameters = $extras['apiParameters'];
-            $bot->reply($apiReply);
+            $this->getUser($bot);
+            $this->dialogflowResponse($bot);
+            $bot->types();
 
             $spotify = SpotifyService::load();
-            $results = $spotify->search($apiParameters['title'], 'track')->tracks->items;
+            $results = $spotify
+                ->search($this->getDialogflowParameter($bot, 'title'), 'track')
+                ->tracks->items;
 
-            //$bot->reply('ok');
             $bot->reply($this->songListTemplate($results));
-
 
         })->middleware($dialogflow);
 
         // search song
         $botman->hears('playlist.songs.add', function (BotMan $bot) {
-            $bot->types();
-            // The incoming message matched the "input.welcome" on Dialoglfow.com
-            // Retrieve API.ai information:
 
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            $this->getUser($bot);
 
-
-            $playlist = $user->currentPlaylist();
+            $playlist = $this->user->currentPlaylist();
             if ($playlist === null) {
-                $bot->reply("Tu dois d'abbord créer une playlist pour y ajouter des musiques");
+                $bot->reply("Tu dois d'abbord créer ou rejoindre une playlist");
             } else {
-
-                $extras = $bot->getMessage()->getExtras();
-                $trackId = $extras['apiParameters']['id'];
-
-
-                try {
-                    $playlist->addSong($trackId, $user);
-                } catch (SpotifyAccountNotLinkedException $exception){
-                    return 'Error while trying to add playlist';
-                }
-
+                $playlist->addSong( $this->getDialogflowParameter($bot, 'id'), $this->user);
+                $playlist->save();
                 $bot->reply('Morceau ajouté à la playlist !');
             }
 
-
         })->middleware($dialogflow);
 
+
         $botman->hears('playlist.songs.current', function (BotMan $bot) {
-            $bot->types();
-            // The incoming message matched the "input.welcome" on Dialoglfow.com
-            // Retrieve API.ai information:
+            $this->getUser($bot);
 
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
-
-
-            $playlist = $user->currentPlaylist();
+            $playlist = $this->user->currentPlaylist();
             if ($playlist === null) {
-                $bot->reply("Tu dois d'abbord créer une playlist pour y ajouter des musiques");
+                $bot->reply("Tu dois d'abbord créer ou participer à une playlist");
             } else {
 
-                $bot->reply($this->uniqueSongTemplate($playlist->currentSong()->item, false));
+                //$bot->reply($this->uniqueSongTemplate($playlist->currentSong()->item, false));
+                $bot->reply('Pas encore dispo');
             }
-
 
         })->middleware($dialogflow);
 
         // search song
         $botman->hears('playlist.songs', function (BotMan $bot) {
-            $bot->types();
-            // The incoming message matched the "input.welcome" on Dialoglfow.com
-            // Retrieve API.ai information:
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            $this->getUser($bot);
 
-            $playlist = $user->currentPlaylist();
+            $playlist = $this->user->currentPlaylist();
             if ($playlist === null) {
-                $bot->reply("Tu dois d'abbord céer une playlist pour y ajouter des musiques");
+                $bot->reply("Tu dois d'abbord céer ou participer à une playlist pour y ajouter des morceaux");
             } else {
-
                 $bot->reply(ButtonTemplate::create('Click sur ce bouton frère !')
                     ->addButton(ElementButton::create('Voir')->url(route('playlist.show', ['playlist' => $playlist])))
                 );
-
             }
-
 
         })->middleware($dialogflow);
 
 
-        /**
-         * Spotify play
-         */
         $botman->hears('playlist.create', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
 
-            if ($user->currentPlaylist() !== null) {
+            $this->getUser($bot);
+
+            if ($this->user->currentPlaylist() !== null) {
                 $bot->reply("Tu dois d'abbord fermer ta playlist actuelle pour en créer une nouvelle");
-            } else {
-
-                try {
-                    $playlist = $user->createAndOpenPlaylist();
-
-                    $bot->reply('Ta playlist a été créée, tu peux maintenant ajouter des musiques'/*, voici son identifiant : '*/);
-                    $bot->reply($playlist->id);
-
-                } catch (SpotifyAccountNotLinkedException $exception){
-                    $bot->reply($this->notLinkedSpotifyAnswer($bot));
-                }
-
-
             }
+
+            $playlist = $this->user->createAndOpenPlaylist();
+            $this->user->setCurrentPlaylist($playlist->id);
+            $this->user->save();
+
+            $bot->reply('Ta playlist a été créée, tu peux maintenant ajouter des musiques'/*, voici son identifiant : '*/);
+            $bot->reply($playlist->id);
+
 
         })->middleware($dialogflow);
 
-        /**
-         * Get playlist id
-         */
         $botman->hears('playlist.id.get', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            $this->getUser($bot);
 
-            $playlist = $user->playlists()->where('status', Playlist::STATUS_OPEN)->first();
+            $playlist = $this->user->currentPlaylist();
             if ($playlist === null) {
                 $bot->reply("Tu n'as aucune playlist ouverte. Crées en une !");
             } else {
-
                 $bot->reply('Voici l\'identifiant : ' . $playlist->id);
             }
 
         })->middleware($dialogflow);
 
-        /**
-         * Get playlist id
-         */
         $botman->hears('playlist.close', function (BotMan $bot) {
-            $bot->types();
-            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            $this->getUser($bot);
 
-            $playlist = $user->playlists()->where('status', Playlist::STATUS_OPEN)->first();
+            $playlist = $this->user->currentPlaylist();
             if ($playlist === null) {
-
-                if ($user->currentPlaylist() !== null){
-                    $bot->reply("Tu ne pas fermer une playlist que tu n'as pas créé.");
-                } else {
-                    $bot->reply("Tu n'as aucune playlist ouverte. Crées en une !");
-                }
+                $bot->reply("Tu n'as aucune playlist ouverte. Crées en une !");
+            } else if ($playlist->user_id !== $this->user->id){
+                $bot->reply("Tu ne pas fermer une playlist dont tu n'es pas le créateur");
             } else {
                 $playlist->close();
                 $playlist->save();
+                $this->user->setCurrentPlaylist(null);
+                $this->user->save();
                 $bot->reply("T'as playlist est maintenant fermée !");
             }
 
@@ -504,7 +356,7 @@ class BotManController extends Controller
     }
 
 
-    private function link_spotify_button(User $user)
+    private function link_spotify_button()
     {
         return GenericTemplate::create()
             ->addElements([
@@ -513,7 +365,7 @@ class BotManController extends Controller
                     ->addButton(
                         ElementButton::create('Connexion')
                             ->url(route('spotify.login', [
-                                'user' => $user
+                                'user' => $this->user
                             ]))
                     )
             ]);

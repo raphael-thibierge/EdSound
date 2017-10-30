@@ -3,6 +3,7 @@
 namespace App;
 
 
+use Carbon\Carbon;
 use Jenssegers\Mongodb\Eloquent\Model;
 
 /**
@@ -17,6 +18,7 @@ class Song extends Model
         'spotify_data',
         'upvotes',
         'downvotes',
+        'played_at'
 
     ];
 
@@ -29,16 +31,18 @@ class Song extends Model
         'humanDuration',
     ];
 
+    protected $dates = [
+        'played_at'
+    ];
+
 
     public function submitter(){
         return $this->belongsTo('App\User');
     }
 
-
     /**
      * Accessors
      */
-
     public function getName(){
         return $this->spotify_data['name'];
 
@@ -48,12 +52,12 @@ class Song extends Model
         return $this->spotify_data['id'];
     }
 
-    public function getDurationMs():int {
-        return $this->spotify_data['duration_ms'];
+    public function getDuration():int {
+        return (int)($this->spotify_data['duration_ms']/1000);
     }
 
     public function getDurationToHuman(): string {
-        $initial = (int)($this->getDurationMs()/1000);
+        $initial = $this->getDuration();
         $seconds = $initial % 60;
         $minutes = ($initial - $seconds ) / 60;
         return $minutes . ':' . $seconds;
@@ -61,6 +65,17 @@ class Song extends Model
 
     public function getHumanDurationAttribute(){
         return $this->getDurationToHuman();
+    }
+
+    public function status(){
+
+        if (!isset($this->played_at) || empty($this->played_at)){
+            return 'not_played';
+        } else {
+            return $this->played_at->addSeconds($this->getDuration()) > Carbon::now() ?
+                'playing' : 'played';
+        }
+
     }
 
 

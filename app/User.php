@@ -17,6 +17,7 @@ use SpotifyWebAPI\SpotifyWebAPI;
  * @property string id
  * @property int spotify_token_expiration
  * @property array spotify_user_data
+ * @property string current_playlist_id
  */
 class User extends \Jenssegers\Mongodb\Auth\User
 {
@@ -50,7 +51,8 @@ class User extends \Jenssegers\Mongodb\Auth\User
         'spotify_refresh_token',
         'spotify_token_expiration',
         'spotify_user_data',
-        'playlist_as_guest_ids'
+        'playlist_as_guest_ids',
+        'current_playlist_id'
     ];
 
     /**
@@ -109,15 +111,17 @@ class User extends \Jenssegers\Mongodb\Auth\User
         return "";
     }
 
-    public function currentPlaylist()
-    {
-        $asHost = $this->playlists()->where('status', Playlist::STATUS_OPEN)->first();
-        if ($asHost === null) {
-            $asHost = $this->playlistAsGuests()->where('status', Playlist::STATUS_OPEN)->first();
-        }
-        return $asHost;
+    public function setCurrentPlaylist($id){
+        $this->current_playlist_id = $id;
     }
 
+    public function currentPlaylist()
+    {
+        if (isset($this->current_playlist_id) && !empty($this->current_playlist_id) && $this->current_playlist_id !== null){
+            return Playlist::find($this->current_playlist_id);
+        }
+        return null;
+    }
 
     /**
      *
@@ -129,9 +133,6 @@ class User extends \Jenssegers\Mongodb\Auth\User
         return $playlist = $this->playlists()->create([
             'name' => "Edgar's playlist test!",
             'status' => Playlist::STATUS_OPEN,
-            'spotify_data' => $this->getUserSpotifyApiAccess()->createUserPlaylist($this->getSpotifyId(),
-                ['name' => config('app.name') . ' Playlist']
-            )
         ]);
     }
 

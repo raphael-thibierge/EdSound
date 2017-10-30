@@ -65,14 +65,13 @@ class SpotifyService
         $session->requestCredentialsToken();
         $accessToken = $session->getAccessToken();
 
-        $session->getTokenExpiration();
-        // Fetch the saved access token from somewhere. A database for example.
-
         $api = new SpotifyWebAPI();
         $api->setAccessToken($accessToken);
 
         return $api;
     }
+
+
 
     public static function createApiForUser(User $user): SpotifyWebAPI{
         $session = self::createSession();

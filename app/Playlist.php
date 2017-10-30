@@ -35,8 +35,7 @@ class Playlist extends Model
          //['created', 'open', 'close'],
         'opened_at_dates',
         'closed_at_dates',
-        'spotify_data'
-
+        'spotify_data',
     ];
 
     /**
@@ -77,14 +76,6 @@ class Playlist extends Model
         $this->status = self::STATUS_OPEN;
         // $this->opened_at_dates []= Carbon::now();
 
-        // get creator
-        $api = $this->user->getUserSpotifyApiAccess();
-
-        // create the spotify playlist
-        $this->spotify_data = $api->createUserPlaylist($this->user->getSpotifyId(),
-            ['name' => Carbon::now()->toDateString()]
-        );
-
     }
 
     /**
@@ -98,15 +89,12 @@ class Playlist extends Model
 
     public function addSong(string $trackId, User $submitter){
 
-        $api = $this->user->getUserSpotifyApiAccess();
+        $api = SpotifyService::load();
 
         $this->songs()->create([
             'submitter_id' => $submitter->id,
             'spotify_data' => $api->getTrack($trackId),
         ]);
-
-        // add track to spotify playlist
-        $api->addUserPlaylistTracks($this->user->getSpotifyId(), $this->getSpotifyId(), [$trackId]);
 
     }
 
