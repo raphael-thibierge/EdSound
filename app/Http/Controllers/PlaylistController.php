@@ -80,19 +80,19 @@ class PlaylistController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  $id
+     * @param Playlist $playlist
      * @return \Illuminate\Http\Response
+     * @internal param $id
      */
-    public function show($id)
+    public function show(Playlist $playlist)
     {
-        $playlist = Playlist::find($id);
-
         $spotifyTracklist = SpotifyService::loadPlaylistTracks($playlist);
 
         foreach ($spotifyTracklist->items as $t) {
-            if(($track = Track::where('spotifyId', '=', $t->track->id))->count() > 0){
-                $track = $track->first();
-            } else {
+
+            $track = Track::where('spotifyId', $t->track->id)->first();
+
+            if($track === null){
 
                 $track = new Track;
                 $track->added_by = $t->added_by;
@@ -122,14 +122,8 @@ class PlaylistController extends Controller
 
         }
 
-        //dd($playlist, $tracklist);
         return view('playlists.show', compact('playlist', 'tracklist'));
 
-        /*
-        return view('playlists.show', [
-            'playlist' => $playlist
-        ]);
-        */
     }
 
     /**

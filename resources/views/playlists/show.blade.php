@@ -5,7 +5,7 @@
     <hr>
     <div class="row">
         <div class="col-lg-2 col-md-4 col-sm-6">
-            <a href="{{ url('/playlist') }}" class="btn btn-primary">Back</a>
+            <a href="{{ route('playlists.index') }}" class="btn btn-primary">Back</a>
         </div>
         <div class="col-lg-2 col-md-4 col-sm-6">
             <h3>Playlist</h3>

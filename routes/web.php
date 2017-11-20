@@ -41,10 +41,12 @@ Route::get('/spotify/login/{user}', 'SpotifyController@login')->name('spotify.lo
 Route::match(['get', 'post'], '/spotify/callback', 'SpotifyController@callback')->name('spotify.callback');
 
 // Playlist routes
-Route::resource('playlist', 'PlaylistController');
-Route::get('/playlist/{playlist}/data', 'PlaylistController@data')->name('playlist.data');
+Route::resource('playlists', 'PlaylistController');
+Route::get('/playlists/{playlist}/data', 'PlaylistController@data')->name('playlist.data');
 
 // User
 Route::prefix('account')->group(function () {
-    Route::get('/', 'UserController@index')->middleware('auth');
+    Route::get('/', 'UserController@index')
+        ->middleware('auth')
+        ->name('user.account');
 });

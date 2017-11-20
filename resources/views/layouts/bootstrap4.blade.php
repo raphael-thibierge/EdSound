@@ -37,26 +37,26 @@
 
                 <ul class="nav navbar-nav mr-auto">
                     <li class="nav-item {{ request()->getPathInfo() == "/" ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="{{ url('/') }}">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-item nav-link" href="{{ route('home') }}">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item {{ strstr(request()->getPathInfo(), "/news") == true ? 'active' : '' }}">
                         <a class="nav-item nav-link" href="#">News</a>
                     </li>
-                    <li class="nav-item {{ strstr(request()->getPathInfo(), "/playlist") == true ? 'active' : '' }}"">
-                        <a class="nav-item nav-link" href="{{ url('/playlist') }}">Playlist</a>
+                    <li class="nav-item {{ strstr(request()->getPathInfo(), "/playlists") == true ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="{{ route('playlists.index') }}">Playlists</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav ml-auto">
                     @if (Route::has('login') && Auth::check() === false)
-                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/login") == true ? 'active' : '' }}"><a class="nav-item nav-link " href="{{ url('/login') }}">Login</a></li>
-                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/register") == true ? 'active' : '' }}"><a class="nav-item nav-link" href="{{ url('/register') }}">Register</a></li>
+                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/login") == true ? 'active' : '' }}"><a class="nav-item nav-link " href="{{ route('login') }}">Login</a></li>
+                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/register") == true ? 'active' : '' }}"><a class="nav-item nav-link" href="{{ route('register') }}">Register</a></li>
                     @else
                         <li class="nav-item {{ strstr(request()->getPathInfo(), "/account") == true ? 'active' : '' }}">
-                            <a class="nav-item nav-link" href="{{ url('/account') }}">Account</a>
+                            <a class="nav-item nav-link" href="{{ route('user.account') }}">Account</a>
                         </li>
 
                         <li class="nav-item">
-                            <form action="{{ url('/logout') }}" method="POST">
+                            <form action="{{ route('logout') }}" method="POST">
                                 {!! csrf_field() !!}
                                 <button type="submit" role='button' class="btn btn-link nav-item nav-link">
                                     Logout

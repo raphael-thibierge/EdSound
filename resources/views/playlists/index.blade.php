@@ -19,9 +19,9 @@
             <img class="card-img-top img-fluid" src="{{ $playlist->url_image }}" alt="Card image cap">
             <div class="card-block">
                 <h4 class="card-title">{{ $playlist->name }}</h4>
-                <a href="{{ url('/playlist', $playlist->id) }}" class="btn btn-primary">Edit</a>
+                <a href="{{ route('playlists.show', ['playlist' => $playlist]) }}" class="btn btn-primary">Show</a>
                 <a href="#" class="btn btn-primary">Share</a>
-                <a href="{{ $playlist->url_platform }}" class="btn btn-primary" target="_blank">Show</a>
+                <a href="{{ $playlist->url_platform }}" class="btn btn-primary" target="_blank">Show in Spotify</a>
             </div>
         </div>
     @endforeach

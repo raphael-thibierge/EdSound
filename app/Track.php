@@ -8,6 +8,12 @@ use Jenssegers\Mongodb\Eloquent\Model;
 
 /**
  * @property mixed spotify_data
+ * @property mixed added_by
+ * @property mixed added_at
+ * @property mixed spotifyId
+ * @property mixed name
+ * @property mixed duration
+ * @property mixed url_preview
  */
 class Track extends Model
 {

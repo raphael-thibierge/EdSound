@@ -46,12 +46,12 @@ class SpotifyController extends Controller
         $api->setReturnType(SpotifyWebAPI::RETURN_ASSOC);
 
         // store user data
-        if(session()->get('user_id')) {
+        if(session()->has('user_id')) {
             $user_id = session()->get('user_id');
         } else if(Auth::user()) {
             $user_id = Auth::user()->getAuthIdentifier();
         } else {
-            // exception
+            throw new \Exception("User is guest");
         }
 
 
