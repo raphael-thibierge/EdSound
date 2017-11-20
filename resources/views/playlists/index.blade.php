@@ -11,8 +11,6 @@
     <h3>Spotify</h3>
     <hr>
 
-
-
     <div class="card-columns">
     @foreach($tPlaylists as $playlist)
         <div class="card">

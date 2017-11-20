@@ -101,8 +101,8 @@ class PlaylistController extends Controller
                 $track->name = $t->track->name;
                 $track->duration = $t->track->duration_ms;
                 $track->url_preview = $t->track->preview_url;
-
                 $track->spotify_data = $t;
+                $track->save();
 
 
                 foreach ($t->track->artists as $a) {
