@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\SpotifyService;
 use App\Playlist;
 use App\User;
 use Illuminate\Http\Request;
@@ -22,7 +23,10 @@ class PlaylistController extends Controller
      */
     public function index()
     {
-        //
+        $playlists = SpotifyService::loadUserPlaylist();
+
+        //dd($playlists);
+        return view('playlists.index', compact('playlists'));
     }
 
     /**

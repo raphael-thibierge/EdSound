@@ -54,7 +54,7 @@
                         <a class="nav-item nav-link" href="#">News</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-item nav-link" href="#">Playlist</a>
+                        <a class="nav-item nav-link" href="{{ url('/playlist') }}">Playlist</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav ml-auto">

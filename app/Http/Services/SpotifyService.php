@@ -10,6 +10,7 @@ namespace App\Http\Services;
 
 
 use App\User;
+use Illuminate\Support\Facades\Auth;
 use SpotifyWebAPI\SpotifyWebAPI;
 use SpotifyWebAPI\Session;
 
@@ -91,5 +92,23 @@ class SpotifyService
         $api = new SpotifyWebAPI();
         $api->setAccessToken($user->spotify_access_token);
         return $api;
+    }
+
+    public static function loadUserPlaylist()
+    {
+        if(!Auth::check())
+            return null;
+
+        $user = Auth::user();
+
+        $session = self::createSession();
+        $session->refreshAccessToken($user->spotify_refresh_token);
+
+        $user->spotify_access_token = $session->getAccessToken();
+
+        $api = new SpotifyWebAPI();
+        $api->setAccessToken($user->spotify_access_token);
+
+        return $api->getMyPlaylists();
     }
 }
