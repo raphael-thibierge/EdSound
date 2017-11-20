@@ -11,22 +11,14 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+// General
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/', 'HomeController@index')->name('home');
 Route::get('/privacy-policy', 'HomeController@privacyPolicy')->name('privacy.policy ');
 
-// botman
+// Botman
 Route::match(['get', 'post'], '/botman', 'BotManController@handle')->middleware('botman');
-
-
-Route::get('/spotify/login/{user}', 'SpotifyController@login')->name('spotify.login');
-Route::match(['get', 'post'], '/spotify/callback', 'SpotifyController@callback')->name('spotify.callback');
-
 
 Route::match(['get', 'post'], '/botman/authorize', 'MessengerAccountLinkingController@showMessengerLoginForm')
     ->middleware('botman')
@@ -44,10 +36,15 @@ Route::post('/botman/confirm', 'MessengerAccountLinkingController@confirm')
     ->middleware('botman')
     ->name('botman.confirm');
 
+// Spotify
+Route::get('/spotify/login/{user}', 'SpotifyController@login')->name('spotify.login');
+Route::match(['get', 'post'], '/spotify/callback', 'SpotifyController@callback')->name('spotify.callback');
 
-/**
- *
- * Playlist routes
- */
+// Playlist routes
 Route::resource('playlist', 'PlaylistController');
 Route::get('/playlist/{playlist}/data', 'PlaylistController@data')->name('playlist.data');
+
+// User
+Route::prefix('account')->group(function () {
+    Route::get('/', 'UserController@index')->middleware('auth');
+});
