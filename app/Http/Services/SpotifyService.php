@@ -107,9 +107,6 @@ class SpotifyService
 
         $user->spotify_access_token = $session->getAccessToken();
 
-//        $api = new SpotifyWebAPI();
-//        $api->setAccessToken($user->spotify_access_token);
-
         $api = $user->getUserSpotifyApiAccess();
 
         return $api->getMyPlaylists();

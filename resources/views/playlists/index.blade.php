@@ -7,8 +7,9 @@
 @stop
 
 @section('content')
-
+    <hr>
     <h3>Spotify</h3>
+    <hr>
 
 
 
@@ -20,7 +21,7 @@
                 <h4 class="card-title">{{ $playlist->name }}</h4>
                 <a href="{{ url('/playlist', $playlist->id) }}" class="btn btn-primary">Edit</a>
                 <a href="#" class="btn btn-primary">Share</a>
-                <a href="{{ $playlist->url_platform }}" class="btn btn-primary">Show</a>
+                <a href="{{ $playlist->url_platform }}" class="btn btn-primary" target="_blank">Show</a>
             </div>
         </div>
     @endforeach
