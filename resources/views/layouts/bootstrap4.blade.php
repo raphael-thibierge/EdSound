@@ -36,22 +36,22 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 
                 <ul class="nav navbar-nav mr-auto">
-                    <li class="nav-item active">
-                        <a class="nav-item nav-link active" href="{{ url('/') }}">Home <span class="sr-only">(current)</span></a>
+                    <li class="nav-item {{ request()->getPathInfo() == "/" ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="{{ url('/') }}">Home <span class="sr-only">(current)</span></a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item {{ strstr(request()->getPathInfo(), "/news") == true ? 'active' : '' }}">
                         <a class="nav-item nav-link" href="#">News</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item {{ strstr(request()->getPathInfo(), "/playlist") == true ? 'active' : '' }}"">
                         <a class="nav-item nav-link" href="{{ url('/playlist') }}">Playlist</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav ml-auto">
                     @if (Route::has('login') && Auth::check() === false)
-                        <li><a class="nav-item nav-link " href="{{ url('/login') }}">Login</a></li>
-                        <li><a class="nav-item nav-link" href="{{ url('/register') }}">Register</a></li>
+                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/login") == true ? 'active' : '' }}"><a class="nav-item nav-link " href="{{ url('/login') }}">Login</a></li>
+                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/register") == true ? 'active' : '' }}"><a class="nav-item nav-link" href="{{ url('/register') }}">Register</a></li>
                     @else
-                        <li class="nav-item">
+                        <li class="nav-item {{ strstr(request()->getPathInfo(), "/account") == true ? 'active' : '' }}">
                             <a class="nav-item nav-link" href="{{ url('/account') }}">Account</a>
                         </li>
 
