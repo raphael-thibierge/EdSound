@@ -76,16 +76,16 @@
         },
         {
             "name": "botman/driver-facebook",
-            "version": "1.3.0",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/botman/driver-facebook.git",
-                "reference": "0641f47aa5a4064499cddacfae16da7985ddab5f"
+                "reference": "14c6fa0a002eb1b86eaada0923bb7db962e7c32a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/botman/driver-facebook/zipball/0641f47aa5a4064499cddacfae16da7985ddab5f",
-                "reference": "0641f47aa5a4064499cddacfae16da7985ddab5f",
+                "url": "https://api.github.com/repos/botman/driver-facebook/zipball/14c6fa0a002eb1b86eaada0923bb7db962e7c32a",
+                "reference": "14c6fa0a002eb1b86eaada0923bb7db962e7c32a",
                 "shasum": ""
             },
             "require": {
@@ -122,7 +122,7 @@
                 "facebook",
                 "facebook messenger"
             ],
-            "time": "2017-11-07T19:40:50+00:00"
+            "time": "2017-11-13T22:16:49+00:00"
         },
         {
             "name": "cartalyst/sentry",
@@ -940,23 +940,21 @@
         },
         {
             "name": "mongodb/mongodb",
-            "version": "1.2.0",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mongodb/mongo-php-library.git",
-                "reference": "5cffeb33b893b6bb04195b99ddc3955a29252339"
+                "reference": "a307dd60e71e1291c60927ea4f3a1905146063f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/5cffeb33b893b6bb04195b99ddc3955a29252339",
-                "reference": "5cffeb33b893b6bb04195b99ddc3955a29252339",
+                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/a307dd60e71e1291c60927ea4f3a1905146063f5",
+                "reference": "a307dd60e71e1291c60927ea4f3a1905146063f5",
                 "shasum": ""
             },
             "require": {
-                "ext-hash": "*",
-                "ext-json": "*",
-                "ext-mongodb": "^1.3.0",
-                "php": ">=5.5"
+                "ext-mongodb": "^1.2.0",
+                "php": ">=5.4"
             },
             "require-dev": {
                 "phpunit/phpunit": "^4.8"
@@ -996,7 +994,7 @@
                 "mongodb",
                 "persistence"
             ],
-            "time": "2017-10-27T19:42:57+00:00"
+            "time": "2017-02-16T18:40:32+00:00"
         },
         {
             "name": "monolog/monolog",
