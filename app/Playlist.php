@@ -26,13 +26,18 @@ class Playlist extends Model
 
     protected $fillable = [
         'created_by',
-        'slug',
         'name',
+        'slug',
         'status',
         'user_id',
-         //['created', 'open', 'close'],
+        'url_image',
+        'url_platform',
+
+        //['created', 'open', 'close'],
         'opened_at_dates',
         'closed_at_dates',
+
+        'spotifyId',
         'spotify_data',
     ];
 
@@ -62,7 +67,7 @@ class Playlist extends Model
      * @return EmbedsMany
      */
     public function songs(){
-        return $this->embedsMany('App\Song');
+        return $this->embedsMany('App\Track');
     }
 
 
@@ -116,7 +121,7 @@ class Playlist extends Model
     public function getSpotifyOwner(){
 
         if (isset($this->spotify_data)){
-            return $this->spotify_data['owner'];
+            return $this->spotify_data['owner']['id'];
         }
         return '';
     }

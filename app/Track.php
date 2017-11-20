@@ -9,16 +9,25 @@ use Jenssegers\Mongodb\Eloquent\Model;
 /**
  * @property mixed spotify_data
  */
-class Song extends Model
+class Track extends Model
 {
 
+    protected $collection = 'tracks';
 
     protected $fillable = [
-        'submitter_id',
+        'added_by',
+        'added_at',
+        'name',
+        'duration',
+        'url_preview',
+
+        'spotifyId',
         'spotify_data',
-        'upvotes',
-        'downvotes',
-        'played_at'
+
+        // Pour les 2 champs ci-dessous, à utiliser pour l'association Track/Playlist, type N-N
+        //'downvotes',
+        //'played_at',
+
 
     ];
 
@@ -35,6 +44,13 @@ class Song extends Model
         'played_at'
     ];
 
+    public function artists(){
+        return $this->hasMany('App\Artist', '_id', '_id');
+    }
+
+    public function albums() {
+        return $this->belongsToMany('App\Albums', null, '_id', '_id');
+    }
 
     public function submitter(){
         return $this->belongsTo('App\User');
