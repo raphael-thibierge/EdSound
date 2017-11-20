@@ -1,7 +1,7 @@
 // get react from dependencies
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.css';
+//import 'bootstrap/dist/css/bootstrap.css';
 import PlaylistRoot from './components/playlists/PlaylistRoot';
 
 if (window.app){

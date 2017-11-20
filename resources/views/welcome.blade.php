@@ -100,7 +100,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    env('APP_NAME')
+                    {{ env('APP_NAME') }}
                 </div>
             </div>
         </div>

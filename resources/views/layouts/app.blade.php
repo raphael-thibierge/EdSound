@@ -102,3 +102,24 @@
     <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
+
+
+
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">EdSound</a>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link" href="#">News</a>
+            <a class="nav-item nav-link" href="#">Account</a>
+            <a class="nav-item nav-link" href="#">Playlist</a>
+            @if (Route::has('login') && Auth::check() === false)
+                <a class="nav-item nav-link" href="{{ url('/login') }}">Login</a>
+                <a class="nav-item nav-link" href="{{ url('/register') }}">Register</a>
+            @endif
+        </div>
+    </div>
+</nav>

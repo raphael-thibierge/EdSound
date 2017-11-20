@@ -2,20 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Services\SpotifyService;
-use App\Playlist;
 use App\User;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class PlaylistController extends Controller
+class UserController extends Controller
 {
-
-    public function data(Playlist $playlist){
-        return $this->successResponse([
-            'playlist' => $playlist
-        ]);
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -23,10 +16,11 @@ class PlaylistController extends Controller
      */
     public function index()
     {
-        $playlists = SpotifyService::loadUserPlaylist();
+        $user = Auth::user();
 
-        //dd($playlists);
-        return view('playlists.index', compact('playlists'));
+        $spotifyLoginURL = action('SpotifyController@login', [$user]);
+
+        return view('user.index', compact('user','spotifyLoginURL'));
     }
 
     /**
@@ -53,23 +47,21 @@ class PlaylistController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Playlist  $playlist
+     * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show(Playlist $playlist)
+    public function show(User $user)
     {
-        return view('playlists.show', [
-            'playlist' => $playlist
-        ]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Playlist  $playlist
+     * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit(Playlist $playlist)
+    public function edit(User $user)
     {
         //
     }
@@ -78,10 +70,10 @@ class PlaylistController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Playlist  $playlist
+     * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Playlist $playlist)
+    public function update(Request $request, User $user)
     {
         //
     }
@@ -89,10 +81,10 @@ class PlaylistController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Playlist  $playlist
+     * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Playlist $playlist)
+    public function destroy(User $user)
     {
         //
     }
