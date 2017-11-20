@@ -186,6 +186,8 @@ return [
         Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
         // botman
         BotMan\BotMan\BotManServiceProvider::class,
+        // debugbar
+        Barryvdh\Debugbar\ServiceProvider::class
     ],
 
     /*
