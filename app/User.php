@@ -72,7 +72,7 @@ class User extends \Jenssegers\Mongodb\Auth\User
 
     public function playlists(): HasMany
     {
-        return $this->HasMany('App\Playlist');
+        return $this->HasMany('App\Playlist', '_id','_id');
     }
 
 

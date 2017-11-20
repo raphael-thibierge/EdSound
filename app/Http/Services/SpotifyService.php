@@ -9,6 +9,7 @@
 namespace App\Http\Services;
 
 
+use App\Playlist;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use SpotifyWebAPI\SpotifyWebAPI;
@@ -94,7 +95,7 @@ class SpotifyService
         return $api;
     }
 
-    public static function loadUserPlaylist()
+    public static function loadUserPlaylists()
     {
         if(!Auth::check())
             return null;
@@ -106,9 +107,30 @@ class SpotifyService
 
         $user->spotify_access_token = $session->getAccessToken();
 
-        $api = new SpotifyWebAPI();
-        $api->setAccessToken($user->spotify_access_token);
+//        $api = new SpotifyWebAPI();
+//        $api->setAccessToken($user->spotify_access_token);
+
+        $api = $user->getUserSpotifyApiAccess();
 
         return $api->getMyPlaylists();
+    }
+
+    public static function loadPlaylistTracks(Playlist $playlist)
+    {
+        if(!Auth::check())
+            return null;
+
+        $user = Auth::user();
+
+        //$api = $user->getUserSpotifyApiAccess();
+
+        $session = self::createSession();
+        $session->refreshAccessToken($user->spotify_refresh_token);
+
+        $user->spotify_access_token = $session->getAccessToken();
+
+        $api = $user->getUserSpotifyApiAccess();
+
+        return $api->getUserPlaylistTracks($playlist->getSpotifyOwner(), $playlist->getSpotifyId());
     }
 }

@@ -20,14 +20,12 @@ class Playlist extends Model
     const STATUS_OPEN = 'open';
     const STATUS_CLOSE = 'close';
 
+    protected $collection = 'playlists';
 
     protected $primaryKey = '_id';
 
-    protected $collection = 'playlists';
-
     protected $fillable = [
         'created_by',
-        '_id',
         'slug',
         'name',
         'status',
@@ -45,7 +43,7 @@ class Playlist extends Model
      */
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\User', '_id','_id');
     }
 
     /**
@@ -53,7 +51,7 @@ class Playlist extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function guests(){
+    public function guests() {
         return $this->belongsToMany('App\User', null, 'playlist_as_guest_ids', 'guests_ids');
     }
 
@@ -111,6 +109,14 @@ class Playlist extends Model
 
         if (isset($this->spotify_data)){
             return $this->spotify_data['id'];
+        }
+        return '';
+    }
+
+    public function getSpotifyOwner(){
+
+        if (isset($this->spotify_data)){
+            return $this->spotify_data['owner'];
         }
         return '';
     }
