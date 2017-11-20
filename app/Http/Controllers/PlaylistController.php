@@ -23,10 +23,10 @@ class PlaylistController extends Controller
      */
     public function index()
     {
-        $playlists = SpotifyService::loadUserPlaylist();
+        $spotifyPlaylists = SpotifyService::loadUserPlaylist();
 
-        //dd($playlists);
-        return view('playlists.index', compact('playlists'));
+        //dd($spotifyPlaylists);
+        return view('playlists.index', compact('spotifyPlaylists'));
     }
 
     /**
