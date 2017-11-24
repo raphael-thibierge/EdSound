@@ -36,33 +36,52 @@ class Track extends Model implements TrackInterface
         return $this->spotifyTrack;
     }
 
+    /**
+     * @return string track name
+     */
     public function getName(): string
     {
         return $this->getTrackFromAppropriateSource()->getName();
     }
 
+    /**
+     * @return array track artist list
+     */
     public function getArtists()
     {
         return $this->getTrackFromAppropriateSource()->getArtists();
     }
 
+    /**
+     * @return mixed track album
+     */
     public function getAlbum()
     {
         return $this->getTrackFromAppropriateSource()->getAlbum();
     }
 
+    /**
+     * @return string track cover url
+     */
     public function getCoverURL(): string
     {
         return $this->getTrackFromAppropriateSource()->getCoverURL();
     }
 
+    /**
+     * @return int track duration in milliseconds
+     */
     public function getDurationMs(): int
     {
         return $this->getTrackFromAppropriateSource()->getDurationMs();
     }
 
+    /**
+     * @return int track release year
+     */
     public function getYear(): int
     {
-        return $this->getTrackFromAppropriateSource()->getDurationMs();
+        return $this->getTrackFromAppropriateSource()->getYear();
     }
+
 }
