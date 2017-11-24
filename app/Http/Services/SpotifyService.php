@@ -127,6 +127,7 @@ class SpotifyService
         $user->spotify_access_token = $session->getAccessToken();
 
         $api = $user->getUserSpotifyApiAccess();
+        $api->setReturnType(SpotifyWebAPI::RETURN_ASSOC);
 
         return $api->getUserPlaylistTracks($playlist->getSpotifyOwner(), $playlist->getSpotifyId());
     }

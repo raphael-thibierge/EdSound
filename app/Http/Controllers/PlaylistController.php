@@ -7,6 +7,7 @@ use App\Artist;
 use App\Http\Services\SpotifyService;
 use App\Playlist;
 use App\Track;
+use App\TrackSpotify;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -88,23 +89,19 @@ class PlaylistController extends Controller
     {
         $spotifyTracklist = SpotifyService::loadPlaylistTracks($playlist);
 
-        foreach ($spotifyTracklist->items as $t) {
+        foreach ($spotifyTracklist['items'] as $t) {
 
-            $track = Track::where('spotifyId', $t->track->id)->first();
+            $track = Track::where('spotifyId', $t['track']['id'])->first();
 
             if($track === null){
 
+
                 $track = new Track;
-                $track->added_by = $t->added_by;
-                $track->added_at = $t->added_at;
-                $track->spotifyId = $t->track->id;
-                $track->name = $t->track->name;
-                $track->duration = $t->track->duration_ms;
-                $track->url_preview = $t->track->preview_url;
-                $track->spotify_data = $t;
                 $track->save();
 
+                $track->spotifyTrack()->save(new TrackSpotify($t['track']));
 
+                /*
                 foreach ($t->track->artists as $a) {
                     $artist = new Artist;
                     // create artist
@@ -113,7 +110,7 @@ class PlaylistController extends Controller
                 foreach ($t->track->album as $a) {
                     $album = new Album();
                     //create album
-                }
+                }*/
 
                 ///$playlist->save();
             }

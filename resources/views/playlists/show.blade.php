@@ -16,7 +16,7 @@
         <div class="col-lg-8 col-md-8 col-sm-9">
             <ul class="list-group">
                 @foreach($tracklist as $track)
-                    <li class="list-group-item">{{ $track->name }}</li>
+                    <li class="list-group-item">{{ $track->getName() }}</li>
                 @endforeach
             </ul>
         </div>
