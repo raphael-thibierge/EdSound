@@ -35,17 +35,17 @@
             <div class="form-group">
                 <label for="inputEmail">Spotify</label>
                 <div class="row">
-                    @if($user->spotify_access_token)
+                    @if($user->isLinkedToSpotify())
                         <div class="col-lg-6 col-md-4 col-sm-8 col-sm-offset-2">
                             <p class="text-center">
-                                <img src="{{ $user->spotify_user_data["images"][0]["url"] }}" class="img-fluid" alt="">
+                                <img src="{{ $user->getSpotifyUserData()["images"][0]["url"] }}" class="img-fluid" alt="">
                             </p>
                         </div>
                         <div class="col-lg-6 col-md-8 col-sm-offset-4 col-sm-8">
                             <div class="row">
                                 <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <p><strong>{{ $user->spotify_user_data["display_name"] }}</strong></p>
-                                    <p><em>{{ $user->spotify_user_data["email"] }}</em></p>
+                                    <p><strong>{{ $user->getSpotifyUserData()["display_name"] }}</strong></p>
+                                    <p><em>{{ $user->getSpotifyUserData()["email"] }}</em></p>
                                 </div>
                                 <div class="col-lg-12 col-md-12 col-sm-12">
                                     <a href="#" class="btn btn-danger">Disconnect</a>

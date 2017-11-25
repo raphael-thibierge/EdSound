@@ -91,7 +91,7 @@ class PlaylistController extends Controller
 
         foreach ($spotifyTracklist['items'] as $t) {
 
-            $track = Track::where('spotifyId', $t['track']['id'])->first();
+            $track = Track::where('spotifyTrack.id', $t['track']['id'])->first();
 
             if($track === null){
 

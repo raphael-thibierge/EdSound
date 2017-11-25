@@ -65,14 +65,26 @@ class User extends \Jenssegers\Mongodb\Auth\User
     ];
 
 
+    public function spotifyConnect(){
+        return $this->OAuthConnects()->where('service', OAuthConnect::SPOTIFY)->first();
+    }
+
+    public function getSpotifyUserData(){
+        return $this->spotifyConnect()['user_data'];
+    }
+
     public function isLinkedToSpotify(): bool
     {
-        return isset($this->spotify_access_token) && !empty($this->spotify_access_token);
+        return $this->spotifyConnect() !== null;
     }
 
     public function playlists(): HasMany
     {
         return $this->HasMany('App\Playlist', '_id','_id');
+    }
+
+    public function OAuthConnects(){
+        return $this->embedsMany('App\OAuthConnect');
     }
 
 
@@ -142,25 +154,30 @@ class User extends \Jenssegers\Mongodb\Auth\User
     private function refreshSpotifyTokenIfNecessary()
     {
         // if user has a expired token, refresh it
-        if ($this->isLinkedToSpotify() && $this->spotify_token_expiration - time() < 3) {
+        if ($this->isLinkedToSpotify() && $this->spotifyConnect()->token_expiration- time() < 3) {
 
             // send refresh token request
             $session = SpotifyService::createSession();
-            $session->refreshAccessToken($this->spotify_refresh_token);
+            $session->refreshAccessToken($this->spotifyConnect()->refresh_token);
 
             // update access token
             if ($session->getAccessToken() !== "") {
-                $this->spotify_access_token = $session->getAccessToken();
-                $this->spotify_token_expiration = $session->getTokenExpiration();
+
+                $this->spotifyConnect()->update([
+                    'access_token' => $session->getAccessToken(),
+                    'refresh_token' => $session->getTokenExpiration(),
+                ]);
+
             }
 
             // update refresh access token
             if ($session->getRefreshToken() !== "") {
-                $this->spotify_refresh_token = $session->getRefreshToken();
+                $this->spotifyConnect()->update([
+                    'refresh_token' => $session->getTokenExpiration(),
+                ]);
             }
 
-            // bad to save inside model, but... you know... ;)
-            $this->save();
+            // bad to update inside model, but... you know... ;)
         }
     }
 
@@ -181,7 +198,7 @@ class User extends \Jenssegers\Mongodb\Auth\User
 
         // create API access
         $api = new SpotifyWebAPI();
-        $api->setAccessToken($this->spotify_access_token);
+        $api->setAccessToken($this->spotifyConnect()->access_token);
 
         return $api;
     }

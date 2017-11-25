@@ -15,7 +15,7 @@ use Jenssegers\Mongodb\Eloquent\Model;
 class TrackSpotify extends Model implements TrackInterface
 {
 
-    protected $primaryKey = '_id';
+    protected $primaryKey = 'id';
 
 
     /**

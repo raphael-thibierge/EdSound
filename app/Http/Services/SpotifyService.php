@@ -103,9 +103,11 @@ class SpotifyService
         $user = Auth::user();
 
         $session = self::createSession();
-        $session->refreshAccessToken($user->spotify_refresh_token);
+        $session->refreshAccessToken($user->spotifyConnect()->refresh_token);
 
-        $user->spotify_access_token = $session->getAccessToken();
+        $user->spotifyConnect()->update([
+            'access_token' => $session->getAccessToken()
+        ]);
 
         $api = $user->getUserSpotifyApiAccess();
 
@@ -119,12 +121,6 @@ class SpotifyService
 
         $user = Auth::user();
 
-        //$api = $user->getUserSpotifyApiAccess();
-
-        $session = self::createSession();
-        $session->refreshAccessToken($user->spotify_refresh_token);
-
-        $user->spotify_access_token = $session->getAccessToken();
 
         $api = $user->getUserSpotifyApiAccess();
         $api->setReturnType(SpotifyWebAPI::RETURN_ASSOC);

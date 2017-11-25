@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\SpotifyService;
+use App\OAuthConnect;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,44 +31,40 @@ class SpotifyController extends Controller
 
     public function callback(Request $request){
 
-        $session = SpotifyService::createSession();
-
-        // Request a access token using the code from Spotify
-        $session->requestAccessToken($request->get('code'));
-
-
-        $accessToken = $session->getAccessToken();
-        $refreshToken = $session->getRefreshToken();
-        $expiration = $session->getTokenExpiration();
-
-
-        $api = new SpotifyWebAPI();
-        $api->setAccessToken($accessToken);
-        $api->setReturnType(SpotifyWebAPI::RETURN_ASSOC);
-
         // store user data
         if(session()->has('user_id')) {
             $user_id = session()->get('user_id');
+            $request->session()->forget('user_id');
         } else if(Auth::user()) {
             $user_id = Auth::user()->getAuthIdentifier();
         } else {
             throw new \Exception("User is guest");
         }
-
-
         $user = User::find($user_id);
-        $user->spotify_access_token = $accessToken;
-        $user->spotify_refresh_token = $refreshToken;
-        $user->spotify_token_expiration = $expiration;
-        $user->spotify_user_data = $api->me();
-        $user->save();
 
-        $request->session()->forget('user_id');
 
-        $redirect_botman = session()->get('redirect_botman');
-        $request->session()->forget('redirect_botman');
+        $session = SpotifyService::createSession();
+        // Request a access token using the code from Spotify
+        $session->requestAccessToken($request->get('code'));
 
-        if($redirect_botman) {
+        //
+        $api = new SpotifyWebAPI();
+        $api->setReturnType(SpotifyWebAPI::RETURN_ASSOC);
+        $api->setAccessToken($session->getAccessToken());
+
+
+        $user->OAuthConnects()->save(new OAuthConnect([
+            'service' => OAuthConnect::SPOTIFY,
+            'access_token'  => $session->getAccessToken(),
+            'refresh_token' => $session->getRefreshToken(),
+            'token_expiration' => $session->getTokenExpiration(),
+            'user_data' => $api->me()
+        ]));
+
+
+
+        if(session()->has('redirect_botman')) {
+            $request->session()->forget('redirect_botman');
             return view('spotify.spotify-success');
         } else {
             return redirect('/account')->with('success','You are connected with Spotify');
